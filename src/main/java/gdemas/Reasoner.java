@@ -1,32 +1,32 @@
 package gdemas;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public abstract class Reasoner {
-    public Domain               _DOMAIN;
-    public Problem              _PROBLEM;
-    public List<String>         _AGENT_NAMES;
-    public List<List<String>>   _COMBINED_PLAN_ACTIONS;
-    public List<String>         _FAULTS;
-    public List<List<String>>   _TRAJECTORY;
-    public List<Integer>        _OBSERVABLE_STATES;
-    public String               _BENCHMARK_NAME;
-    public String               _DOMAIN_NAME;
-    public String               _PROBLEM_NAME;
-    public int                  _AGENTS_NUM;
-    public int                  _GOAL_SIZE;
-    public int                  _PLAN_LENGTH;
-    public int                  _FAULTS_NUM;
-    public int                  _REPETITION_NUM;
-    public String               _OBSERVABILITY;
-    public String               _REASONER_NAME;
-    public int                  _VARIABLES_NUM;
-    public int                  _CONSTRAINTS_NUM;
-    public long                 _MODELLING_DURATION_MS;
-    public long                 _SOLVING_DURATION_MS;
-    public long                 _COMBINING_DURATION_MS;
+    public Domain                           _DOMAIN;
+    public Problem                          _PROBLEM;
+    public List<String>                     _AGENT_NAMES;
+    public List<List<String>>               _COMBINED_PLAN_ACTIONS;
+    public List<List<Map<String, String>>>  _COMBINED_PLAN_CONDITIONS;
+    public List<String>                     _FAULTS;
+    public List<List<String>>               _TRAJECTORY;
+    public List<Integer>                    _OBSERVABLE_STATES;
+    public String                           _BENCHMARK_NAME;
+    public String                           _DOMAIN_NAME;
+    public String                           _PROBLEM_NAME;
+    public int                              _AGENTS_NUM;
+    public int                              _GOAL_SIZE;
+    public int                              _PLAN_LENGTH;
+    public int                              _FAULTS_NUM;
+    public int                              _REPETITION_NUM;
+    public String                           _OBSERVABILITY;
+    public String                           _REASONER_NAME;
+    public int                              _VARIABLES_NUM;
+    public int                              _CONSTRAINTS_NUM;
+    public long                             _MODELLING_DURATION_MS;
+    public long                             _SOLVING_DURATION_MS;
+    public long                             _COMBINING_DURATION_MS;
 
     public Reasoner(String  benchmarkName,
                     String  domainName,
@@ -42,6 +42,7 @@ public abstract class Reasoner {
         this._PROBLEM                   = Parser.parseProblem(problemFile);
         this._AGENT_NAMES               = Parser.parseAgentNames(agentsFile);
         this._COMBINED_PLAN_ACTIONS     = Parser.parseCombinedPlan(combinedPlanFile);
+        this._COMBINED_PLAN_CONDITIONS  = this.computeCombinedPlanConditions();
         this._FAULTS                    = Parser.parseFaultsAsFlatList(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
@@ -63,6 +64,36 @@ public abstract class Reasoner {
     }
 
     public abstract void diagnoseProblem();
+    private List<List<Map<String, String>>> computeCombinedPlanConditions() {
+        List<List<Map<String, String>>> cpc = new ArrayList<>();
+        for (int t = 0; t < this._COMBINED_PLAN_ACTIONS.size(); t++) {
+            List<Map<String, String>> tcpc = new ArrayList<>();
+            for (int a = 0; a < this._AGENT_NAMES.size(); a++) {
+                Map<String, String> atcpc = new HashMap<>();
+                atcpc.put("pre", extractActionGroundedConditions(t, a, "preconditions"));
+                atcpc.put("eff", extractActionGroundedConditions(t, a, "effects"));
+                tcpc.add(atcpc);
+            }
+            cpc.add(tcpc);
+        }
+        return cpc;
+    }
+    private String extractActionGroundedConditions(int t, int a, String conditionsType) {
+        if (this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+            return "";
+        } else {
+            String groundedAction = this._COMBINED_PLAN_ACTIONS.get(t).get(a);
+            String[] actionSignature = groundedAction.split(" ");
+            String actionName = actionSignature[0];
+            String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
+            String conditions = this._DOMAIN.actions.get(actionName).get(conditionsType);
+            String[] actionParams = this._DOMAIN.actions.get(actionName).get("parameters").replaceAll("\\s+-\\s+\\S+", "").split(" ");
+            for (int i = 0; i < actionArguments.length; i++) {
+                conditions = conditions.replaceAll("\\?" + actionParams[i].substring(1), actionArguments[i]);
+            }
+            return conditions;
+        }
+    }
     private List<Integer> computeObservableStates(String observability, int statesNumber) {
         List<Integer> observableStates = new ArrayList<>();
         switch (observability) {

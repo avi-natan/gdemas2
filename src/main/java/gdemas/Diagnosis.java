@@ -42,13 +42,23 @@ public class Diagnosis {
 
     public String toString () {
         StringJoiner result = new StringJoiner("\n");
+        int i = 0;
         for (List<String> innerList : this.actionHealthStates) {
             StringJoiner innerJoiner = new StringJoiner(" ");
             for (String item : innerList) {
                 innerJoiner.add(item);
             }
-            result.add(innerJoiner.toString());
+            result.add(i + ":\t" + innerJoiner);
+            i += 1;
         }
         return result.toString();
+    }
+
+    public List<String> getSvals() {
+        return svals;
+    }
+
+    public List<List<String>> getActionHealthStates() {
+        return actionHealthStates;
     }
 }

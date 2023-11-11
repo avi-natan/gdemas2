@@ -15,7 +15,6 @@ import static gdemas.Utils.*;
 
 public class ReasonerSimple extends Reasoner {
 
-    private final List<List<Map<String, String>>>   combinedPlanConditions;
     private final List<String>                      relevantGroundedPlanPredicates;
     private Model                                   model;
     private long                                    xi;
@@ -33,41 +32,8 @@ public class ReasonerSimple extends Reasoner {
                           File      trajectoryFile,
                           String    observability) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
-        this.combinedPlanConditions = this.computeCombinedPlanConditions();
         this.relevantGroundedPlanPredicates = this.computeRelevantGroundedPlanPredicates();
         this.diagnoses = new ArrayList<>();
-    }
-
-    private List<List<Map<String, String>>> computeCombinedPlanConditions() {
-        List<List<Map<String, String>>> cpc = new ArrayList<>();
-        for (int t = 0; t < this._PLAN_LENGTH; t++) {
-            List<Map<String, String>> tcpc = new ArrayList<>();
-            for (int a = 0; a < this._AGENTS_NUM; a++) {
-                Map<String, String> atcpc = new HashMap<>();
-                atcpc.put("pre", extractActionGroundedConditions(t, a, "preconditions"));
-                atcpc.put("eff", extractActionGroundedConditions(t, a, "effects"));
-                tcpc.add(atcpc);
-            }
-            cpc.add(tcpc);
-        }
-        return cpc;
-    }
-
-    private String extractActionGroundedConditions(int t, int a, String conditionsType) {
-        if (this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
-            return "";
-        } else {
-            String groundedAction = this._COMBINED_PLAN_ACTIONS.get(t).get(a);
-            String[] actionSignature = groundedAction.split(" ");
-            String actionName = actionSignature[0];
-            String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
-            String conditions = this._DOMAIN.actions.get(actionName).get(conditionsType);
-            String[] actionParams = this._DOMAIN.actions.get(actionName).get("parameters").replaceAll("\\s+-\\s+\\S+", "").split(" ");
-            for (int i = 0; i < actionArguments.length; i++) {
-                conditions = conditions.replaceAll("\\?" + actionParams[i].substring(1), actionArguments[i]);
-            }
-            return conditions;
-        }
     }
 
     /**
@@ -86,7 +52,7 @@ public class ReasonerSimple extends Reasoner {
     }
 
     private void addPredicatesOfCondition(int t, int a, String conditionType, List<String> rgppreds) {
-        String cnd = this.combinedPlanConditions.get(t).get(a).get(conditionType);
+        String cnd = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get(conditionType);
         if (!cnd.isEmpty()) {
             List<String> cndPredicates = Arrays.asList(cnd.split("(?=\\() |(?<=\\)) "));
             for (int i = 0; i < cndPredicates.size(); i++) {
@@ -197,7 +163,7 @@ public class ReasonerSimple extends Reasoner {
     }
 
     private boolean nonEffectedPredicate(String predicate, int jointActionTime) {
-        for (Map<String, String> m : this.combinedPlanConditions.get(jointActionTime)) {
+        for (Map<String, String> m : this._COMBINED_PLAN_CONDITIONS.get(jointActionTime)) {
             if (m.get("eff").contains(predicate)) {
                 return false;
             }
@@ -213,7 +179,7 @@ public class ReasonerSimple extends Reasoner {
                     BoolVar[] n_pre = addValidPre(t, a, n);
                     Constraint normalAndPreValid = this.model.and(n_pre);
 
-                    String[] eff = this.combinedPlanConditions.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
+                    String[] eff = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
                     int nextVarT = t+1;
                     Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ? this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2)))) : this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1)))).toArray(Constraint[]::new);
 
@@ -245,7 +211,7 @@ public class ReasonerSimple extends Reasoner {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
                 if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
                     Constraint c = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":c"));
-                    String[] pre = this.combinedPlanConditions.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+                    String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
                     Constraint[] all_pre = Stream.concat(Stream.of(this.model.trueConstraint()), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).map(this.model::and).toArray(Constraint[]::new))).toArray(Constraint[]::new);
                     Constraint notAllPreValid = this.model.not(this.model.and(all_pre));
                     this.model.ifOnlyIf(c, notAllPreValid);
@@ -259,7 +225,7 @@ public class ReasonerSimple extends Reasoner {
     }
 
     private Constraint effNotOccurCons(int t, int a) {
-        String[] eff = this.combinedPlanConditions.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
+        String[] eff = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
         int nextVarT = t + 1;
         Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ?
                 this.model.and(
@@ -275,7 +241,7 @@ public class ReasonerSimple extends Reasoner {
     }
 
     private BoolVar[] addValidPre(int t, int a, BoolVar v) {
-        String[] pre = this.combinedPlanConditions.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+        String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
         return Stream.concat(Stream.of(v), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).toArray(BoolVar[]::new))).toArray(BoolVar[]::new);
     }
 
