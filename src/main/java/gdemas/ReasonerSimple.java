@@ -8,7 +8,6 @@ import org.chocosolver.solver.variables.BoolVar;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gdemas.Utils.*;
