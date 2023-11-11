@@ -95,7 +95,7 @@ public abstract class Reasoner {
             return conditions;
         }
     }
-    protected void addPredicatesOfCondition(int t, int a, String conditionType, List<String> rgppreds) {
+    protected void addPredicatesOfCondition(int t, int a, String conditionType, List<String> predicatesList) {
         String cnd = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get(conditionType);
         if (!cnd.isEmpty()) {
             List<String> cndPredicates = Arrays.asList(cnd.split("(?=\\() |(?<=\\)) "));
@@ -106,7 +106,7 @@ public abstract class Reasoner {
                     cndPredicates.set(i, cndPredicates.get(i).substring(1, cndPredicates.get(i).length()-1));
                 }
             }
-            rgppreds.addAll(cndPredicates.stream().filter(s -> !rgppreds.contains(s)).collect(Collectors.toList()));
+            predicatesList.addAll(cndPredicates.stream().filter(s -> !predicatesList.contains(s)).collect(Collectors.toList()));
         }
     }
     private List<Integer> computeObservableStates(String observability, int statesNumber) {
