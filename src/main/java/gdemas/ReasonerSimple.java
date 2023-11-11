@@ -44,26 +44,11 @@ public class ReasonerSimple extends Reasoner {
         List<String> rgppreds = new ArrayList<>();
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                addPredicatesOfCondition(t, a, "pre", rgppreds);
-                addPredicatesOfCondition(t, a, "eff", rgppreds);
+                this.addPredicatesOfCondition(t, a, "pre", rgppreds);
+                this.addPredicatesOfCondition(t, a, "eff", rgppreds);
             }
         }
         return rgppreds;
-    }
-
-    private void addPredicatesOfCondition(int t, int a, String conditionType, List<String> rgppreds) {
-        String cnd = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get(conditionType);
-        if (!cnd.isEmpty()) {
-            List<String> cndPredicates = Arrays.asList(cnd.split("(?=\\() |(?<=\\)) "));
-            for (int i = 0; i < cndPredicates.size(); i++) {
-                if (cndPredicates.get(i).contains("(not ")) {
-                    cndPredicates.set(i, cndPredicates.get(i).substring(6, cndPredicates.get(i).length()-2));
-                } else {
-                    cndPredicates.set(i, cndPredicates.get(i).substring(1, cndPredicates.get(i).length()-1));
-                }
-            }
-            rgppreds.addAll(cndPredicates.stream().filter(s -> !rgppreds.contains(s)).collect(Collectors.toList()));
-        }
     }
 
     @Override

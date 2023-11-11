@@ -2,6 +2,7 @@ package gdemas;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Reasoner {
     public Domain                           _DOMAIN;
@@ -92,6 +93,20 @@ public abstract class Reasoner {
                 conditions = conditions.replaceAll("\\?" + actionParams[i].substring(1), actionArguments[i]);
             }
             return conditions;
+        }
+    }
+    protected void addPredicatesOfCondition(int t, int a, String conditionType, List<String> rgppreds) {
+        String cnd = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get(conditionType);
+        if (!cnd.isEmpty()) {
+            List<String> cndPredicates = Arrays.asList(cnd.split("(?=\\() |(?<=\\)) "));
+            for (int i = 0; i < cndPredicates.size(); i++) {
+                if (cndPredicates.get(i).contains("(not ")) {
+                    cndPredicates.set(i, cndPredicates.get(i).substring(6, cndPredicates.get(i).length()-2));
+                } else {
+                    cndPredicates.set(i, cndPredicates.get(i).substring(1, cndPredicates.get(i).length()-1));
+                }
+            }
+            rgppreds.addAll(cndPredicates.stream().filter(s -> !rgppreds.contains(s)).collect(Collectors.toList()));
         }
     }
     private List<Integer> computeObservableStates(String observability, int statesNumber) {
