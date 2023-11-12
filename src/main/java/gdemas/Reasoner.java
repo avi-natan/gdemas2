@@ -43,7 +43,7 @@ public abstract class Reasoner {
         this._PROBLEM                   = Parser.parseProblem(problemFile);
         this._AGENT_NAMES               = Parser.parseAgentNames(agentsFile);
         this._COMBINED_PLAN_ACTIONS     = Parser.parseCombinedPlan(combinedPlanFile);
-        this._COMBINED_PLAN_CONDITIONS  = this.computeCombinedPlanConditions();
+        this._COMBINED_PLAN_CONDITIONS  = this.computePlanConditions(this._COMBINED_PLAN_ACTIONS);
         this._FAULTS                    = Parser.parseFaultsAsFlatList(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
@@ -65,25 +65,25 @@ public abstract class Reasoner {
     }
 
     public abstract void diagnoseProblem();
-    private List<List<Map<String, String>>> computeCombinedPlanConditions() {
-        List<List<Map<String, String>>> cpc = new ArrayList<>();
-        for (int t = 0; t < this._COMBINED_PLAN_ACTIONS.size(); t++) {
-            List<Map<String, String>> tcpc = new ArrayList<>();
+    private List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions) {
+        List<List<Map<String, String>>> pc = new ArrayList<>();
+        for (int t = 0; t < planActions.size(); t++) {
+            List<Map<String, String>> tpc = new ArrayList<>();
             for (int a = 0; a < this._AGENT_NAMES.size(); a++) {
-                Map<String, String> atcpc = new HashMap<>();
-                atcpc.put("pre", extractActionGroundedConditions(t, a, "preconditions"));
-                atcpc.put("eff", extractActionGroundedConditions(t, a, "effects"));
-                tcpc.add(atcpc);
+                Map<String, String> atpc = new HashMap<>();
+                atpc.put("pre", extractActionGroundedConditions(planActions, t, a, "preconditions"));
+                atpc.put("eff", extractActionGroundedConditions(planActions, t, a, "effects"));
+                tpc.add(atpc);
             }
-            cpc.add(tcpc);
+            pc.add(tpc);
         }
-        return cpc;
+        return pc;
     }
-    private String extractActionGroundedConditions(int t, int a, String conditionsType) {
-        if (this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+    private String extractActionGroundedConditions(List<List<String>> planActions, int t, int a, String conditionsType) {
+        if (planActions.get(t).get(a).equals("nop")) {
             return "";
         } else {
-            String groundedAction = this._COMBINED_PLAN_ACTIONS.get(t).get(a);
+            String groundedAction = planActions.get(t).get(a);
             String[] actionSignature = groundedAction.split(" ");
             String actionName = actionSignature[0];
             String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
