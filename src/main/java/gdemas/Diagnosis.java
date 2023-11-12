@@ -17,23 +17,18 @@ public class Diagnosis {
         for (int t = 0; t < planLength; t++) {
             List<String> stepHealthStates = new ArrayList<>();
             for (int a = 0; a < agentsNum; a++) {
-                BoolVar b = vmap.getValue("H:" + t + ":" + a + ":h");
-                if (b == null) {
-                    stepHealthStates.add("x");
-                } else if (s.getIntVal(b) == 1) {
+                if (vmap.containsKey("H:" + t + ":" + a + ":h") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":h")) == 1) {
                     stepHealthStates.add("h");
+                } else if (vmap.containsKey("H:" + t + ":" + a + ":f") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":f")) == 1) {
+                    stepHealthStates.add("f");
+                } else if (vmap.containsKey("H:" + t + ":" + a + ":c") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":c")) == 1) {
+                    stepHealthStates.add("c");
+                } else if (vmap.containsKey("H:" + t + ":" + a + ":i") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":i")) == 1) {
+                    stepHealthStates.add("i");
+                } else if (vmap.containsKey("H:" + t + ":" + a + ":g") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":g")) == 1) {
+                    stepHealthStates.add("g");
                 } else {
-                    b = vmap.getValue("H:" + t + ":" + a + ":f");
-                    if (s.getIntVal(b) == 1) {
-                        stepHealthStates.add("f");
-                    } else {
-                        b = vmap.getValue("H:" + t + ":" + a + ":c");
-                        if (s.getIntVal(b) == 1) {
-                            stepHealthStates.add("c");
-                        } else {
-                            stepHealthStates.add("-");
-                        }
-                    }
+                    stepHealthStates.add("x");
                 }
             }
             this.actionHealthStates.add(stepHealthStates);
