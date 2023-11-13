@@ -65,7 +65,7 @@ public abstract class Reasoner {
     }
 
     public abstract void diagnoseProblem();
-    private List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions) {
+    protected List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions) {
         List<List<Map<String, String>>> pc = new ArrayList<>();
         for (int t = 0; t < planActions.size(); t++) {
             List<Map<String, String>> tpc = new ArrayList<>();
