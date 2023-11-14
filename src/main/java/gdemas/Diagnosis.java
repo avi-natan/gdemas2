@@ -6,8 +6,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import java.util.*;
 
 public class Diagnosis {
-    private final List<String> svals;
-    private final List<List<String>> actionHealthStates;
+    public final List<String> svals;
+    public final List<List<String>> actionHealthStates;
     public Diagnosis(Solution s, BijectiveMap<String, BoolVar> vmap, int planLength, int agentsNum) {
         this.svals = new ArrayList<>();
         for (BoolVar b: vmap.values()) {
@@ -47,13 +47,5 @@ public class Diagnosis {
             i += 1;
         }
         return result.toString();
-    }
-
-    public List<String> getSvals() {
-        return svals;
-    }
-
-    public List<List<String>> getActionHealthStates() {
-        return actionHealthStates;
     }
 }

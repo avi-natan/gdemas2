@@ -54,6 +54,7 @@ public class ReasonerSimple extends Reasoner {
     public void diagnoseProblem() {
         this.modelProblem();
         this.solveProblem();
+        this.printDiagnoses();
         print(9);
     }
 
@@ -247,8 +248,13 @@ public class ReasonerSimple extends Reasoner {
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
             this.diagnoses.add(d);
-            print("Diagnosis #" + this.diagnoses.size() + ":\n" + d);
             s = solver.findSolution();
+        }
+    }
+
+    private void printDiagnoses() {
+        for (int d = 0; d < this.diagnoses.size(); d++) {
+            print("Diagnosis #" + (d+1) + ":\n" + this.diagnoses.get(d));
         }
     }
 

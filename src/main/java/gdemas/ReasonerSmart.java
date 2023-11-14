@@ -24,6 +24,7 @@ public class ReasonerSmart extends Reasoner {
     private long                                        xi;
     private BijectiveMap<String, BoolVar>               vmap;
     private final List<List<Diagnosis>>                 agentsDiagnoses;
+    private List<GlobalDiagnosis>                       globalDiagnoses;
 
     public ReasonerSmart(String     benchmarkName,
                          String     domainName,
@@ -40,6 +41,7 @@ public class ReasonerSmart extends Reasoner {
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
         this.agentsDiagnoses = Arrays.asList(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this.globalDiagnoses = new ArrayList<>();
     }
 
     private List<List<String>> computeAgentsPredicates() {
@@ -105,6 +107,8 @@ public class ReasonerSmart extends Reasoner {
             this.modelProblem(A);
             this.solveProblem(A);
         }
+        this.combineDiagnoses();
+        this.printDiagnoses();
         print(9);
     }
 
@@ -397,6 +401,132 @@ public class ReasonerSmart extends Reasoner {
             this.agentsDiagnoses.get(A).add(d);
             print("Agent " + A + " diagnosis #" + this.agentsDiagnoses.get(A).size() + ":\n" + d);
             s = solver.findSolution();
+        }
+    }
+
+    private void combineDiagnoses() {
+        // creating partial global diagnoses out of the local diagnoses of the first agent
+        initialPartialGlobalDiagnoses();
+
+        // combining the global diagnoses with the local diagnoses of every subsequent agent
+        for (int a = 1; a < this._AGENTS_NUM; a++) {
+            List<GlobalDiagnosis> newGlobalDiagnoses = new ArrayList<>();
+            for (GlobalDiagnosis gd: this.globalDiagnoses) {
+                for (int d = 0; d < this.agentsDiagnoses.get(a).size(); d++) {
+                    Diagnosis ld = this.agentsDiagnoses.get(a).get(d);
+                    GlobalDiagnosis ngd = createNewGlobalDiagnosis(gd, ld, d);
+                    if (ngd != null) {
+                        if (!this.containsGlobalDiagnosis(newGlobalDiagnoses, ngd)) {
+                            newGlobalDiagnoses.add(ngd);
+                        }
+                    }
+                }
+            }
+            this.globalDiagnoses = newGlobalDiagnoses;
+        }
+    }
+
+    private void initialPartialGlobalDiagnoses() {
+        for (int d = 0; d < this.agentsDiagnoses.get(0).size(); d++) {
+            GlobalDiagnosis gd = new GlobalDiagnosis();
+            gd.actionHealthStates = new ArrayList<>();
+            for (List<String> ls: this.agentsDiagnoses.get(0).get(d).actionHealthStates) {
+                List<String> nls = new ArrayList<>(ls);
+                gd.actionHealthStates.add(nls);
+            }
+            gd.constituentDiagnosisIndices = List.of(d);
+            this.globalDiagnoses.add(gd);
+        }
+    }
+
+    private GlobalDiagnosis createNewGlobalDiagnosis(GlobalDiagnosis gd, Diagnosis ld, int d) {
+        List<List<String>> newHealthStates = new ArrayList<>();
+        for (int t = 0; t < gd.actionHealthStates.size(); t++) {
+            List<String> snhs = new ArrayList<>();
+            for (int a = 0; a < gd.actionHealthStates.get(t).size(); a++) {
+                String gds = gd.actionHealthStates.get(t).get(a);
+                String lds = ld.actionHealthStates.get(t).get(a);
+                String nds = "";
+                switch (gds+lds) {
+                    case "xx":
+                        nds = "x";
+                        break;
+
+                    case "xi":
+                    case "ix":
+                    case "ii":
+                        nds = "i";
+                        break;
+
+                    case "xg":
+                    case "gx":
+                    case "gg":
+                        nds = "g";
+                        break;
+
+                    case "xh":
+                    case "ih":
+                    case "hx":
+                    case "hi":
+                    case "hh":
+                        nds = "h";
+                        break;
+
+                    case "xf":
+                    case "gf":
+                    case "fx":
+                    case "fg":
+                    case "ff":
+                        nds = "f";
+                        break;
+
+                    case "xc":
+                    case "gc":
+                    case "cx":
+                    case "cg":
+                    case "cc":
+                        nds = "c";
+                        break;
+
+                    case "ig":
+                    case "if":
+                    case "ic":
+                    case "gi":
+                    case "gh":
+                    case "hg":
+                    case "hf":
+                    case "hc":
+                    case "fi":
+                    case "fh":
+                    case "fc":
+                    case "ci":
+                    case "ch":
+                    case "cf":
+                        return null;
+                }
+                snhs.add(nds);
+            }
+            newHealthStates.add(snhs);
+        }
+        GlobalDiagnosis ngd = new GlobalDiagnosis();
+        ngd.actionHealthStates = newHealthStates;
+        ngd.constituentDiagnosisIndices = new ArrayList<>(gd.constituentDiagnosisIndices);
+        ngd.constituentDiagnosisIndices.add(d);
+        return ngd;
+    }
+
+    private boolean containsGlobalDiagnosis(List<GlobalDiagnosis> newGlobalDiagnoses, GlobalDiagnosis ngd) {
+        for (GlobalDiagnosis gd: newGlobalDiagnoses ) {
+            if (gd.toString().equals(ngd.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void printDiagnoses() {
+        for (int d = 0; d < this.globalDiagnoses.size(); d++) {
+            print("Diagnosis #" + (d+1) + ":\n" + this.globalDiagnoses.get(d));
         }
     }
 }
