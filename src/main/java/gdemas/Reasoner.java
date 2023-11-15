@@ -78,7 +78,7 @@ public abstract class Reasoner {
         this._FAULTS_NUM                = this._FAULTS.size();
         this._REPETITION_NUM            = Parser.parseRepetitionNum(faultsFile);
         this._OBSERVABILITY             = observability;
-        this._REASONER_NAME             = "Simple";
+        this._REASONER_NAME             = "";
 
         // instance non-controlled parameters
         this._AGENTS_NUM                = this._AGENT_NAMES.size();
@@ -101,6 +101,7 @@ public abstract class Reasoner {
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
         this._SOLV_AND_COMB_RUNTIME     = 0;
+        this._DIAGNOSES_NUM             = 0;
     }
 
     public abstract void diagnoseProblem();
@@ -198,6 +199,13 @@ public abstract class Reasoner {
                 }
                 break;
         }
+
+        if (!observableStates.contains(0)) {
+            observableStates.add(0, 0);
+        }
+        if (!observableStates.contains(statesNumber-1)) {
+            observableStates.add(statesNumber-1);
+        }
         return observableStates;
     }
 
@@ -241,49 +249,49 @@ public abstract class Reasoner {
     }
 
     // measurement members
-    public String get_MODELLING_AGENT_NAME() {
+    public String getModellingAgentName() {
         return _MODELLING_AGENT_NAME;
     }
-    public long get_MODELLING_PREDICATES_NUM() {
+    public int getModellingPredicatesNum() {
         return _MODELLING_PREDICATES_NUM;
     }
-    public long get_MODELLING_ACTIONS_NUM() {
+    public int getModellingActionsNum() {
         return _MODELLING_ACTIONS_NUM;
     }
-    public int get_MODELLING_VARIABLES_NUM() {
+    public int getModellingVariablesNum() {
         return _MODELLING_VARIABLES_NUM;
     }
-    public int get_MODELLING_CONSTRAINTS_NUM() {
+    public int getModellingConstraintsNum() {
         return _MODELLING_CONSTRAINTS_NUM;
     }
-    public long get_MODELLING_RUNTIME() {
+    public long getModellingRuntime() {
         return _MODELLING_RUNTIME;
     }
-    public String get_SOLVING_AGENT_NAME() {
+    public String getSolvingAgentName() {
         return _SOLVING_AGENT_NAME;
     }
-    public long get_SOLVING_PREDICATES_NUM() {
+    public int getSolvingPredicatesNum() {
         return _SOLVING_PREDICATES_NUM;
     }
-    public long get_SOLVING_ACTIONS_NUM() {
+    public int getSolvingActionsNum() {
         return _SOLVING_ACTIONS_NUM;
     }
-    public int get_SOLVING_VARIABLES_NUM() {
+    public int getSolvingVariablesNum() {
         return _SOLVING_VARIABLES_NUM;
     }
-    public int get_SOLVING_CONSTRAINTS_NUM() {
+    public int getSolvingConstraintsNum() {
         return _SOLVING_CONSTRAINTS_NUM;
     }
-    public long get_SOLVING_RUNTIME() {
+    public long getSolvingRuntime() {
         return _SOLVING_RUNTIME;
     }
-    public long get_COMBINING_RUNTIME() {
+    public long getCombiningRuntime() {
         return _COMBINING_RUNTIME;
     }
-    public long get_SOLV_AND_COMB_RUNTIME() {
+    public long getSolvAndCombRuntime() {
         return _SOLV_AND_COMB_RUNTIME;
     }
-    public int get_DIAGNOSES_NUM() {
+    public int getDiagnosesNum() {
         return _DIAGNOSES_NUM;
     }
 }

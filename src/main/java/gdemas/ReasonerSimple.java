@@ -33,6 +33,7 @@ public class ReasonerSimple extends Reasoner {
                           File      trajectoryFile,
                           String    observability) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
+        this._REASONER_NAME = "simple";
         this.relevantGroundedPlanPredicates = this.computeRelevantGroundedPlanPredicates();
         this.diagnoses = new ArrayList<>();
     }

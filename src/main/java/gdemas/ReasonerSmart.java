@@ -39,6 +39,7 @@ public class ReasonerSmart extends Reasoner {
                          File       trajectoryFile,
                          String     observability) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
+        this._REASONER_NAME = "smart";
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
