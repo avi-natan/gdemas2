@@ -90,6 +90,7 @@ public class ReasonerSimple extends Reasoner {
         // combine diagnoses
         this._COMBINING_RUNTIME = 0;
         this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME;
+        this._DIAGNOSES_NUM = this.diagnoses.size();
 
         // print diagnoses
         this.printDiagnoses();

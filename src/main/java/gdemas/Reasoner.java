@@ -48,6 +48,7 @@ public abstract class Reasoner {
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _SOLV_AND_COMB_RUNTIME;
+    public int                              _DIAGNOSES_NUM;
 
     public Reasoner(String  benchmarkName,
                     String  domainName,
@@ -281,5 +282,8 @@ public abstract class Reasoner {
     }
     public long get_SOLV_AND_COMB_RUNTIME() {
         return _SOLV_AND_COMB_RUNTIME;
+    }
+    public int get_DIAGNOSES_NUM() {
+        return _DIAGNOSES_NUM;
     }
 }

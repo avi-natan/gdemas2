@@ -152,6 +152,7 @@ public class ReasonerSmart extends Reasoner {
         Instant end = Instant.now();
         this._COMBINING_RUNTIME = Duration.between(start, end).toMillis();
         this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
+        this._DIAGNOSES_NUM = this.globalDiagnoses.size();
 
         this.printDiagnoses();
     }
