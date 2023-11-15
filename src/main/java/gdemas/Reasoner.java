@@ -4,7 +4,10 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static gdemas.Utils.print;
+
 public abstract class Reasoner {
+    // Operational members
     public Domain                           _DOMAIN;
     public Problem                          _PROBLEM;
     public List<String>                     _AGENT_NAMES;
@@ -13,21 +16,38 @@ public abstract class Reasoner {
     public List<String>                     _FAULTS;
     public List<List<String>>               _TRAJECTORY;
     public List<Integer>                    _OBSERVABLE_STATES;
+
+    // output members
+    // controlled parameters
     public String                           _BENCHMARK_NAME;
     public String                           _DOMAIN_NAME;
     public String                           _PROBLEM_NAME;
-    public int                              _AGENTS_NUM;
-    public int                              _GOAL_SIZE;
-    public int                              _PLAN_LENGTH;
     public int                              _FAULTS_NUM;
     public int                              _REPETITION_NUM;
     public String                           _OBSERVABILITY;
     public String                           _REASONER_NAME;
-    public int                              _VARIABLES_NUM;
-    public int                              _CONSTRAINTS_NUM;
-    public long                             _MODELLING_DURATION_MS;
-    public long                             _SOLVING_DURATION_MS;
-    public long                             _COMBINING_DURATION_MS;
+
+    // instance non-controlled parameters
+    public int                              _AGENTS_NUM;
+    public int                              _GOAL_SIZE;
+    public double                           _GOAL_AGENT_RATIO;
+    public int                              _PLAN_LENGTH;
+
+    // measurement members
+    public String                           _MODELLING_AGENT_NAME;
+    public int                              _MODELLING_PREDICATES_NUM;
+    public int                              _MODELLING_ACTIONS_NUM;
+    public int                              _MODELLING_VARIABLES_NUM;
+    public int                              _MODELLING_CONSTRAINTS_NUM;
+    public long                             _MODELLING_RUNTIME;
+    public String                           _SOLVING_AGENT_NAME;
+    public int                              _SOLVING_PREDICATES_NUM;
+    public int                              _SOLVING_ACTIONS_NUM;
+    public int                              _SOLVING_VARIABLES_NUM;
+    public int                              _SOLVING_CONSTRAINTS_NUM;
+    public long                             _SOLVING_RUNTIME;
+    public long                             _COMBINING_RUNTIME;
+    public long                             _SOLV_AND_COMB_RUNTIME;
 
     public Reasoner(String  benchmarkName,
                     String  domainName,
@@ -39,6 +59,7 @@ public abstract class Reasoner {
                     File    faultsFile,
                     File    trajectoryFile,
                     String  observability) {
+        // Operational members
         this._DOMAIN                    = Parser.parseDomain(domainFile);
         this._PROBLEM                   = Parser.parseProblem(problemFile);
         this._AGENT_NAMES               = Parser.parseAgentNames(agentsFile);
@@ -47,24 +68,54 @@ public abstract class Reasoner {
         this._FAULTS                    = Parser.parseFaultsAsFlatList(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
+
+        // output members
+        // controlled parameters
         this._BENCHMARK_NAME            = benchmarkName;
         this._DOMAIN_NAME               = domainName;
         this._PROBLEM_NAME              = problemName;
-        this._AGENTS_NUM                = this._AGENT_NAMES.size();
-        this._GOAL_SIZE                 = this._PROBLEM.goal.size();
-        this._PLAN_LENGTH               = this._COMBINED_PLAN_ACTIONS.size();
         this._FAULTS_NUM                = this._FAULTS.size();
         this._REPETITION_NUM            = Parser.parseRepetitionNum(faultsFile);
         this._OBSERVABILITY             = observability;
         this._REASONER_NAME             = "Simple";
-        this._VARIABLES_NUM             = 0;
-        this._CONSTRAINTS_NUM           = 0;
-        this._MODELLING_DURATION_MS     = 0;
-        this._SOLVING_DURATION_MS       = 0;
-        this._COMBINING_DURATION_MS     = 0;
+
+        // instance non-controlled parameters
+        this._AGENTS_NUM                = this._AGENT_NAMES.size();
+        this._GOAL_SIZE                 = this._PROBLEM.goal.size();
+        this._GOAL_AGENT_RATIO          = this._GOAL_SIZE * 1.0 / this._AGENTS_NUM;
+        this._PLAN_LENGTH               = this._COMBINED_PLAN_ACTIONS.size();
+
+        // measurement members
+        this._MODELLING_AGENT_NAME      = "";
+        this._MODELLING_PREDICATES_NUM  = 0;
+        this._MODELLING_ACTIONS_NUM     = 0;
+        this._MODELLING_VARIABLES_NUM   = 0;
+        this._MODELLING_CONSTRAINTS_NUM = 0;
+        this._MODELLING_RUNTIME         = 0;
+        this._SOLVING_AGENT_NAME        = "";
+        this._SOLVING_PREDICATES_NUM    = 0;
+        this._SOLVING_ACTIONS_NUM       = 0;
+        this._SOLVING_VARIABLES_NUM     = 0;
+        this._SOLVING_CONSTRAINTS_NUM   = 0;
+        this._SOLVING_RUNTIME           = 0;
+        this._COMBINING_RUNTIME         = 0;
+        this._SOLV_AND_COMB_RUNTIME     = 0;
     }
 
     public abstract void diagnoseProblem();
+
+    protected int countActionsNumber(List<List<String>> planActions) {
+        int count = 0;
+        for (List<String> planAction : planActions) {
+            for (String s : planAction) {
+                if (!s.equals("nop")) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
+
     protected List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions) {
         List<List<Map<String, String>>> pc = new ArrayList<>();
         for (int t = 0; t < planActions.size(); t++) {
@@ -148,6 +199,10 @@ public abstract class Reasoner {
         }
         return observableStates;
     }
+
+
+    // output members
+    // controlled parameters
     public String getBenchmarkName() {
         return this._BENCHMARK_NAME;
     }
@@ -156,18 +211,6 @@ public abstract class Reasoner {
     }
     public String getProblemName() {
         return this._PROBLEM_NAME;
-    }
-    public int getAgentsNum() {
-        return this._AGENTS_NUM;
-    }
-    public int getGoalSize() {
-        return this._GOAL_SIZE;
-    }
-    public double getGoalAgentsRatio() {
-        return this._GOAL_SIZE * 1.0 / this._AGENTS_NUM;
-    }
-    public int getPlanLength() {
-        return this._PLAN_LENGTH;
     }
     public int getFaultsNum() {
         return this._FAULTS_NUM;
@@ -181,22 +224,62 @@ public abstract class Reasoner {
     public String getReasonerName() {
         return this._REASONER_NAME;
     }
-    public int getVariablesNum() {
-        return this._VARIABLES_NUM;
+
+    // instance non-controlled parameters
+    public int getAgentsNum() {
+        return this._AGENTS_NUM;
     }
-    public int getConstraintsNum() {
-        return this._CONSTRAINTS_NUM;
+    public int getGoalSize() {
+        return this._GOAL_SIZE;
     }
-    public long getModellingDurationMS() {
-        return this._MODELLING_DURATION_MS;
+    public double getGoalAgentsRatio() {
+        return this._GOAL_AGENT_RATIO;
     }
-    public long getSolvingDurationMS() {
-        return this._SOLVING_DURATION_MS;
+    public int getPlanLength() {
+        return this._PLAN_LENGTH;
     }
-    public long getCombiningDurationMS() {
-        return this._COMBINING_DURATION_MS;
+
+    // measurement members
+    public String get_MODELLING_AGENT_NAME() {
+        return _MODELLING_AGENT_NAME;
     }
-    public long getSolvingAndCombiningDurationMS() {
-        return this._SOLVING_DURATION_MS + this._COMBINING_DURATION_MS;
+    public long get_MODELLING_PREDICATES_NUM() {
+        return _MODELLING_PREDICATES_NUM;
+    }
+    public long get_MODELLING_ACTIONS_NUM() {
+        return _MODELLING_ACTIONS_NUM;
+    }
+    public int get_MODELLING_VARIABLES_NUM() {
+        return _MODELLING_VARIABLES_NUM;
+    }
+    public int get_MODELLING_CONSTRAINTS_NUM() {
+        return _MODELLING_CONSTRAINTS_NUM;
+    }
+    public long get_MODELLING_RUNTIME() {
+        return _MODELLING_RUNTIME;
+    }
+    public String get_SOLVING_AGENT_NAME() {
+        return _SOLVING_AGENT_NAME;
+    }
+    public long get_SOLVING_PREDICATES_NUM() {
+        return _SOLVING_PREDICATES_NUM;
+    }
+    public long get_SOLVING_ACTIONS_NUM() {
+        return _SOLVING_ACTIONS_NUM;
+    }
+    public int get_SOLVING_VARIABLES_NUM() {
+        return _SOLVING_VARIABLES_NUM;
+    }
+    public int get_SOLVING_CONSTRAINTS_NUM() {
+        return _SOLVING_CONSTRAINTS_NUM;
+    }
+    public long get_SOLVING_RUNTIME() {
+        return _SOLVING_RUNTIME;
+    }
+    public long get_COMBINING_RUNTIME() {
+        return _COMBINING_RUNTIME;
+    }
+    public long get_SOLV_AND_COMB_RUNTIME() {
+        return _SOLV_AND_COMB_RUNTIME;
     }
 }

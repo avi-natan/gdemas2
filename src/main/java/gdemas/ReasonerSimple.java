@@ -7,6 +7,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -52,13 +54,6 @@ public class ReasonerSimple extends Reasoner {
 
     @Override
     public void diagnoseProblem() {
-        this.modelProblem();
-        this.solveProblem();
-        this.printDiagnoses();
-        print(9);
-    }
-
-    private void modelProblem() {
         // create the model
         this.model = new Model();
 
@@ -68,6 +63,39 @@ public class ReasonerSimple extends Reasoner {
         // initialize the variable map
         this.vmap = new BijectiveMap<>();
 
+        // model problem
+        Instant start = Instant.now();
+        this.modelProblem();
+        Instant end = Instant.now();
+        this._MODELLING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
+        this._MODELLING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
+        this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);
+        this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+        this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+        this._MODELLING_RUNTIME = Duration.between(start, end).toMillis();
+
+        print(999);
+
+        // solve problem
+        start = Instant.now();
+        this.solveProblem();
+        end = Instant.now();
+        this._SOLVING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
+        this._SOLVING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
+        this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);
+        this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+        this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+        this._SOLVING_RUNTIME = Duration.between(start, end).toMillis();
+
+        // combine diagnoses
+        this._COMBINING_RUNTIME = 0;
+        this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME;
+
+        // print diagnoses
+        this.printDiagnoses();
+    }
+
+    private void modelProblem() {
         // initialize state variables
         this.initializeStateVariables();
 
@@ -77,27 +105,21 @@ public class ReasonerSimple extends Reasoner {
         // adding constraints
         // health states mutual exclusiveness
         this.constraintHealthStatesMutualExclusive();
-        print(9);
 
         // transition of non-effected variables
         this.constraintTransitionNonEffected();
-        print(9);
 
         // transition of variables in the effects of an action in a normal state
         this.constraintTransitionNormalState();
-        print(9);
 
         // transition of variables in the effects of an action in a faulty state
         this.constraintTransitionFaultyState();
-        print(9);
 
         // transition of variables in the effects of an action in a conflict state
         this.constraintTransitionConflictState();
-        print(9);
 
         // observation
         this.constraintObservation();
-        print(999);
     }
 
     private void initializeStateVariables() {

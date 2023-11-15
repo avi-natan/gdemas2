@@ -7,6 +7,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,24 +106,57 @@ public class ReasonerSmart extends Reasoner {
     @Override
     public void diagnoseProblem() {
         for (int A = 0; A < this._AGENTS_NUM; A++) {
+            // create the model
+            this.model = new Model();
+
+            // set the variable name count number
+            this.xi = 1;
+
+            // initialize the variable map
+            this.vmap = new BijectiveMap<>();
+
+            // model problem
+            Instant start = Instant.now();
             this.modelProblem(A);
+            Instant end = Instant.now();
+            long runtime = Duration.between(start, end).toMillis();
+            if (runtime > this._MODELLING_RUNTIME) {
+                this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(A);
+                this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(A).size();
+                this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
+                this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._MODELLING_RUNTIME = runtime;
+            }
+
+            print(999);
+
+            // solve problem
+            start = Instant.now();
             this.solveProblem(A);
+            end = Instant.now();
+            runtime = Duration.between(start, end).toMillis();
+            if (runtime > this._SOLVING_RUNTIME) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(A);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(A).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_RUNTIME = runtime;
+            }
         }
+
+        // combining diagnoses
+        Instant start = Instant.now();
         this.combineDiagnoses();
+        Instant end = Instant.now();
+        this._COMBINING_RUNTIME = Duration.between(start, end).toMillis();
+        this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
+
         this.printDiagnoses();
-        print(9);
     }
 
     private void modelProblem(int A) {
-        // create the model
-        this.model = new Model();
-
-        // set the variable name count number
-        this.xi = 1;
-
-        // initialize the variable map
-        this.vmap = new BijectiveMap<>();
-
         // initialize state variables
         this.initializeStateVariables(A);
 
@@ -131,35 +166,27 @@ public class ReasonerSmart extends Reasoner {
         // adding constraints
         // health states mutual exclusiveness
         this.constraintHealthStatesMutualExclusive(A);
-        print(9);
 
         // transition of non-effected variables
         this.constraintTransitionNonEffected(A);
-        print(9);
 
         // transition of variables in the effects of an action in a normal state
         this.constraintTransitionNormalState(A);
-        print(9);
 
         // transition of variables in the effects of an action in a faulty state
         this.constraintTransitionFaultyState(A);
-        print(9);
 
         // transition of variables in the effects of an action in a conflict state
         this.constraintTransitionConflictState(A);
-        print(9);
 
         // transition of variables in the effects of an action in an innocent state
         this.constraintTransitionInnocentState(A);
-        print(9);
 
         // transition of variables in the effects of an action in a guilty state
         this.constraintTransitionGuiltyState(A);
-        print(9);
 
         // observation
         this.constraintObservation(A);
-        print(999);
     }
 
 
