@@ -242,6 +242,38 @@ public class Parser {
         return combinedPlan;
     }
 
+    public static List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions, int agentsNum, Domain domain) {
+        List<List<Map<String, String>>> pc = new ArrayList<>();
+        for (int t = 0; t < planActions.size(); t++) {
+            List<Map<String, String>> tpc = new ArrayList<>();
+            for (int a = 0; a < agentsNum; a++) {
+                Map<String, String> atpc = new HashMap<>();
+                atpc.put("pre", extractActionGroundedConditions(planActions, t, a, "preconditions", domain));
+                atpc.put("eff", extractActionGroundedConditions(planActions, t, a, "effects", domain));
+                tpc.add(atpc);
+            }
+            pc.add(tpc);
+        }
+        return pc;
+    }
+
+    private static String extractActionGroundedConditions(List<List<String>> planActions, int t, int a, String conditionsType, Domain domain) {
+        if (planActions.get(t).get(a).equals("nop")) {
+            return "";
+        } else {
+            String groundedAction = planActions.get(t).get(a);
+            String[] actionSignature = groundedAction.split(" ");
+            String actionName = actionSignature[0];
+            String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
+            String conditions = domain.actions.get(actionName).get(conditionsType);
+            String[] actionParams = domain.actions.get(actionName).get("parameters").replaceAll("\\s+-\\s+\\S+", "").split(" ");
+            for (int i = 0; i < actionArguments.length; i++) {
+                conditions = conditions.replaceAll("\\?" + actionParams[i].substring(1), actionArguments[i]);
+            }
+            return conditions;
+        }
+    }
+
     public static List<String> parseFaultsAsFlatList(File faultsFile) {
         String faultsFileString = readFromFile(faultsFile);
         String[] jointFaults = faultsFileString.split("\r\n");

@@ -98,7 +98,7 @@ public class ReasonerSmart extends Reasoner {
     private List<List<List<Map<String, String>>>> computeAgentsPlanConditions() {
         List<List<List<Map<String, String>>>> agentsPlanConditions = new ArrayList<>();
         for (int a = 0; a < this._AGENTS_NUM; a++) {
-            List<List<Map<String, String>>> planConditions = this.computePlanConditions(this.agentsPlanActions.get(a));
+            List<List<Map<String, String>>> planConditions = Parser.computePlanConditions(this.agentsPlanActions.get(a), this._AGENT_NAMES.size(), this._DOMAIN);
             agentsPlanConditions.add(planConditions);
         }
         return agentsPlanConditions;

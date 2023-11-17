@@ -65,7 +65,7 @@ public abstract class Reasoner {
         this._PROBLEM                   = Parser.parseProblem(problemFile);
         this._AGENT_NAMES               = Parser.parseAgentNames(agentsFile);
         this._COMBINED_PLAN_ACTIONS     = Parser.parseCombinedPlan(combinedPlanFile);
-        this._COMBINED_PLAN_CONDITIONS  = this.computePlanConditions(this._COMBINED_PLAN_ACTIONS);
+        this._COMBINED_PLAN_CONDITIONS  = Parser.computePlanConditions(this._COMBINED_PLAN_ACTIONS, this._AGENT_NAMES.size(), this._DOMAIN);
         this._FAULTS                    = Parser.parseFaultsAsFlatList(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
@@ -118,36 +118,6 @@ public abstract class Reasoner {
         return count;
     }
 
-    protected List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions) {
-        List<List<Map<String, String>>> pc = new ArrayList<>();
-        for (int t = 0; t < planActions.size(); t++) {
-            List<Map<String, String>> tpc = new ArrayList<>();
-            for (int a = 0; a < this._AGENT_NAMES.size(); a++) {
-                Map<String, String> atpc = new HashMap<>();
-                atpc.put("pre", extractActionGroundedConditions(planActions, t, a, "preconditions"));
-                atpc.put("eff", extractActionGroundedConditions(planActions, t, a, "effects"));
-                tpc.add(atpc);
-            }
-            pc.add(tpc);
-        }
-        return pc;
-    }
-    private String extractActionGroundedConditions(List<List<String>> planActions, int t, int a, String conditionsType) {
-        if (planActions.get(t).get(a).equals("nop")) {
-            return "";
-        } else {
-            String groundedAction = planActions.get(t).get(a);
-            String[] actionSignature = groundedAction.split(" ");
-            String actionName = actionSignature[0];
-            String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
-            String conditions = this._DOMAIN.actions.get(actionName).get(conditionsType);
-            String[] actionParams = this._DOMAIN.actions.get(actionName).get("parameters").replaceAll("\\s+-\\s+\\S+", "").split(" ");
-            for (int i = 0; i < actionArguments.length; i++) {
-                conditions = conditions.replaceAll("\\?" + actionParams[i].substring(1), actionArguments[i]);
-            }
-            return conditions;
-        }
-    }
     protected void addPredicatesOfCondition(int t, int a, String conditionType, List<String> predicatesList) {
         String cnd = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get(conditionType);
         if (!cnd.isEmpty()) {
