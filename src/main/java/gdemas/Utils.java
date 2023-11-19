@@ -1,6 +1,10 @@
 package gdemas;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Utils {
@@ -14,7 +18,52 @@ public class Utils {
     }
 
     public static File[] listDirectories(File parentDirectory) {
-        return Objects.requireNonNullElseGet(parentDirectory.listFiles(File::isDirectory), () -> new File[]{});
+        File[] dirs = Objects.requireNonNullElseGet(parentDirectory.listFiles(File::isDirectory), () -> new File[]{});
+        Arrays.sort(dirs, new WindowsComparator());
+        return dirs;
+    }
+
+    public static void deleteFolderContents(File folder) {
+        // If it's a directory, list its contents
+        File[] contents = folder.listFiles();
+        if (contents != null) {
+            for (File file : contents) {
+                // Recursively delete files and directories within the directory
+                recursiveDelete(file);
+            }
+        }
+    }
+
+    public static void recursiveDelete(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            // If it's a directory, list its contents
+            File[] contents = fileOrDirectory.listFiles();
+            if (contents != null) {
+                for (File file : contents) {
+                    // Recursively delete files and directories within the directory
+                    recursiveDelete(file);
+                }
+            }
+        }
+
+        // Delete the file or directory
+        fileOrDirectory.delete();
+    }
+
+    public static void mkdirIfDoesntExist(File folder) {
+        if (!folder.exists()){
+            folder.mkdir();
+        }
+    }
+
+    public static void copyFileIfDoesntExist(File src, File dst) {
+        if (!dst.exists()) {
+            try {
+                Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }
