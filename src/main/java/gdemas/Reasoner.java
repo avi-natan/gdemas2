@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gdemas.Utils.print;
-
 public abstract class Reasoner {
     // Operational members
     public Domain                           _DOMAIN;

@@ -134,6 +134,6 @@ public class Record {
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
         row.createCell(c++).setCellValue(this._SOLV_AND_COMB_RUNTIME);
-        row.createCell(c++).setCellValue(this._DIAGNOSES_NUM);
+        row.createCell(c).setCellValue(this._DIAGNOSES_NUM);
     }
 }
