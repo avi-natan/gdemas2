@@ -167,19 +167,10 @@ public class Parser {
         }
     }
 
-    public static List<String> parseFaultsAsFlatList(File faultsFile) {
+    public static List<String> parseFaults(File faultsFile) {
         String faultsFileString = readFromFile(faultsFile);
-        String[] jointFaults = faultsFileString.split("\r\n");
-        List<String> faultsAsFlatList = new ArrayList<>();
-        for (int i = 0; i < jointFaults.length; i++) {
-            String[] stepFaults = jointFaults[i].split(" ");
-            for (int j = 0; j < stepFaults.length; j++) {
-                if (stepFaults[j].equals("f")) {
-                    faultsAsFlatList.add("t:" + i + ",a:" + j);
-                }
-            }
-        }
-        return faultsAsFlatList;
+        String[] faults = faultsFileString.split("\r\n");
+        return Arrays.asList(faults);
     }
 
     public static List<List<String>> parseTrajectory(File trajectoryFile) {

@@ -64,7 +64,7 @@ public abstract class Reasoner {
         this._AGENT_NAMES               = Parser.parseAgentNames(agentsFile);
         this._COMBINED_PLAN_ACTIONS     = Parser.parseCombinedPlan(combinedPlanFile);
         this._COMBINED_PLAN_CONDITIONS  = Parser.computePlanConditions(this._COMBINED_PLAN_ACTIONS, this._AGENT_NAMES.size(), this._DOMAIN);
-        this._FAULTS                    = Parser.parseFaultsAsFlatList(faultsFile);
+        this._FAULTS                    = Parser.parseFaults(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
 
