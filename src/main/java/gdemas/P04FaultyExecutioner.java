@@ -25,7 +25,6 @@ public class P04FaultyExecutioner {
             report.executionType = "continue";
             report.parseFromLastReport(new File("benchmarks/mastrips/05 - faulty executions/report.txt"));
         }
-        print(9);
 
         File[] domainFolders = listDirectories(inputFolder);
         for (File domainFolder: domainFolders) {
@@ -136,8 +135,6 @@ public class P04FaultyExecutioner {
             e.printStackTrace();
             // Handle the exception as needed
         }
-
-        print(9);
     }
 
     private static int calculateTotalActionsNumber(List<List<String>> combinedPlanActions) {
