@@ -75,7 +75,7 @@ public class ReasonerSimple extends Reasoner {
         this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
         this._MODELLING_RUNTIME = Duration.between(start, end).toMillis();
 
-        print(999);
+//        print(999);
 
         // solve problem
         start = Instant.now();
@@ -94,7 +94,7 @@ public class ReasonerSimple extends Reasoner {
         this._DIAGNOSES_NUM = this.diagnoses.size();
 
         // print diagnoses
-        this.printDiagnoses();
+//        this.printDiagnoses();
     }
 
     private void modelProblem() {

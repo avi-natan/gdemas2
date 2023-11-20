@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Utils {
@@ -64,6 +65,18 @@ public class Utils {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static int calculateTotalActionsNumber(List<List<String>> combinedPlanActions) {
+        int res = 0;
+        for (List<String> combinedPlanAction : combinedPlanActions) {
+            for (String s : combinedPlanAction) {
+                if (!s.equals("nop")) {
+                    res += 1;
+                }
+            }
+        }
+        return res;
     }
 
 }

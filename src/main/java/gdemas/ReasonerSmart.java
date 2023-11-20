@@ -130,7 +130,7 @@ public class ReasonerSmart extends Reasoner {
                 this._MODELLING_RUNTIME = runtime;
             }
 
-            print(999);
+//            print(999);
 
             // solve problem
             start = Instant.now();
@@ -155,7 +155,7 @@ public class ReasonerSmart extends Reasoner {
         this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
 
-        this.printDiagnoses();
+//        this.printDiagnoses();
     }
 
     private void modelProblem(int A) {
@@ -428,7 +428,6 @@ public class ReasonerSmart extends Reasoner {
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
             this.agentsDiagnoses.get(A).add(d);
-            print("Agent " + A + " diagnosis #" + this.agentsDiagnoses.get(A).size() + ":\n" + d);
             s = solver.findSolution();
         }
     }
