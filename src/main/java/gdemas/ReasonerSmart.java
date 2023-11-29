@@ -137,7 +137,14 @@ public class ReasonerSmart extends Reasoner {
             this.solveProblem(A);
             end = Instant.now();
             runtime = Duration.between(start, end).toMillis();
-            if (runtime > this._SOLVING_RUNTIME) {
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(A);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(A).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_RUNTIME = runtime;
+            } else if (runtime > this._SOLVING_RUNTIME) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(A);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(A).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
