@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static gdemas.Utils.print;
+
 public abstract class Reasoner {
     // Operational members
     public Domain                           _DOMAIN;
@@ -30,6 +32,7 @@ public abstract class Reasoner {
     public int                              _GOAL_SIZE;
     public double                           _GOAL_AGENT_RATIO;
     public int                              _PLAN_LENGTH;
+    public double                           _COEFFICIENT_OF_VARIATION;
 
     // measurement members
     public String                           _MODELLING_AGENT_NAME;
@@ -83,6 +86,7 @@ public abstract class Reasoner {
         this._GOAL_SIZE                 = this._PROBLEM.goal.size();
         this._GOAL_AGENT_RATIO          = this._GOAL_SIZE * 1.0 / this._AGENTS_NUM;
         this._PLAN_LENGTH               = this._COMBINED_PLAN_ACTIONS.size();
+        this._COEFFICIENT_OF_VARIATION  = Parser.calculateCoefficientOfVariation(this._AGENTS_NUM, this._COMBINED_PLAN_ACTIONS);
 
         // measurement members
         this._MODELLING_AGENT_NAME      = "";
@@ -155,7 +159,7 @@ public abstract class Reasoner {
                 break;
             case "75p":
                 for (int i = 0; i < statesNumber; i++) {
-                    if (i % 2 != 0) observableStates.add(i);
+                    if (i % 4 != 0) observableStates.add(i);
                 }
                 if (!observableStates.contains(statesNumber-1)) {
                     observableStates.add(statesNumber-1);
@@ -214,6 +218,9 @@ public abstract class Reasoner {
     }
     public int getPlanLength() {
         return this._PLAN_LENGTH;
+    }
+    public double getCoefficientOfVariation() {
+        return _COEFFICIENT_OF_VARIATION;
     }
 
     // measurement members

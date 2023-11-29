@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Parser {
 
-    private static String readFromFile(File file) {
+    public static String readFromFile(File file) {
         try {
             return String.join(System.lineSeparator(), Files.readAllLines(file.toPath()));
         } catch (IOException e) {
@@ -114,7 +114,7 @@ public class Parser {
         return new ArrayList<>(Arrays.asList(problemFileString.split("\\(:init")[1].split("\\(:goal")[0].replaceAll("\\s*\\)\\s*$", "").replaceAll("\\s*\\(", "(").split("(?=\\()|(?<=\\))")));
     }
 
-    private static List<String> parseGoal(File problemFile) {
+    public static List<String> parseGoal(File problemFile) {
         String problemFileString = readFromFile(problemFile);
         return new ArrayList<>(Arrays.asList(problemFileString.split("\\(:goal")[1].replaceAll("\\s+", " ").substring(6).replaceAll("\\s*\\)\\s*\\)\\s*\\)$", "").split("(?=\\() |(?<=\\)) ")));
     }
@@ -183,5 +183,28 @@ public class Parser {
             trajectory.add(l);
         }
         return trajectory;
+    }
+
+    public static double calculateCoefficientOfVariation(int agentsNum, List<List<String>> planActions) {
+        int totalNumberOfActions = 0;
+        double[] agentActionNumbers = new double[agentsNum];
+        for (List<String> combinedPlanAction : planActions) {
+            for (int a = 0; a < agentsNum; a++) {
+                if (!combinedPlanAction.get(a).equals("nop")) {
+                    agentActionNumbers[a] += 1;
+                    totalNumberOfActions += 1;
+                }
+            }
+        }
+        double mean = totalNumberOfActions * 1.0 / agentsNum;
+
+        double enumerator = 0;
+        for (double agentActionNumber : agentActionNumbers) {
+            enumerator += Math.pow(agentActionNumber - mean, 2);
+        }
+
+        double std = Math.sqrt(enumerator / agentsNum);
+
+        return std / mean;
     }
 }

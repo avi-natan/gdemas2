@@ -9,10 +9,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static gdemas.Utils.print;
@@ -43,7 +40,10 @@ public class ReasonerSmart extends Reasoner {
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
-        this.agentsDiagnoses = Arrays.asList(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this.agentsDiagnoses = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            this.agentsDiagnoses.add(new ArrayList<>());
+        }
         this.globalDiagnoses = new ArrayList<>();
     }
 

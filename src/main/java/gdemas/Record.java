@@ -2,6 +2,11 @@ package gdemas;
 
 import org.apache.poi.ss.usermodel.Row;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class Record {
 
     public static String[] headers = new String[] {
@@ -17,6 +22,7 @@ public class Record {
             "# Goal size",
             "# Goal/Agent",
             "# Plan length",
+            "# Coefficient of variation",
 
             "M Agent name",
             "# M Predicates number",
@@ -50,6 +56,7 @@ public class Record {
     public int                              _GOAL_SIZE;
     public double                           _GOAL_AGENT_RATIO;
     public int                              _PLAN_LENGTH;
+    public double                           _COEFFICIENT_OF_VARIATION;
 
     // measurement members
     public String                           _MODELLING_AGENT_NAME;
@@ -84,6 +91,7 @@ public class Record {
         this._GOAL_SIZE                 = r.getGoalSize();
         this._GOAL_AGENT_RATIO          = r.getGoalAgentsRatio();
         this._PLAN_LENGTH               = r.getPlanLength();
+        this._COEFFICIENT_OF_VARIATION  = r.getCoefficientOfVariation();
 
         // measurement members
         this._MODELLING_AGENT_NAME      = r.getModellingAgentName();
@@ -118,6 +126,7 @@ public class Record {
         row.createCell(c++).setCellValue(this._GOAL_SIZE);
         row.createCell(c++).setCellValue(this._GOAL_AGENT_RATIO);
         row.createCell(c++).setCellValue(this._PLAN_LENGTH);
+        row.createCell(c++).setCellValue(this._COEFFICIENT_OF_VARIATION);
 
         // measurement members
         row.createCell(c++).setCellValue(this._MODELLING_AGENT_NAME);
@@ -135,5 +144,45 @@ public class Record {
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
         row.createCell(c++).setCellValue(this._SOLV_AND_COMB_RUNTIME);
         row.createCell(c).setCellValue(this._DIAGNOSES_NUM);
+    }
+
+    public void recordToTxtFile(File txtFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(txtFile))) {
+            // Create the record string
+            String recordString =
+                "Benchmark:" + this._BENCHMARK_NAME + "\n" +
+                "Domain:" + this._DOMAIN_NAME + "\n" +
+                "Problem:" + this._PROBLEM_NAME + "\n" +
+                "# Faults number:" + this._FAULTS_NUM + "\n" +
+                "# Repetition index:" + this._REPETITION_NUM + "\n" +
+                "Observability:" + this._OBSERVABILITY + "\n" +
+                "Reasoner:" + this._REASONER_NAME + "\n" +
+
+                "# Agents number:" + this._AGENTS_NUM + "\n" +
+                "# Goal size:" + this._GOAL_SIZE + "\n" +
+                "# Goal/Agent:" + this._GOAL_AGENT_RATIO + "\n" +
+                "# Plan length:" + this._PLAN_LENGTH + "\n" +
+                "# Coefficient of variation:" + this._COEFFICIENT_OF_VARIATION + "\n" +
+
+                "M Agent name:" + this._MODELLING_AGENT_NAME + "\n" +
+                "# M Predicates number:" + this._MODELLING_PREDICATES_NUM + "\n" +
+                "# M Actions number:" + this._MODELLING_ACTIONS_NUM + "\n" +
+                "# M Variables number:" + this._MODELLING_VARIABLES_NUM + "\n" +
+                "# M Constraints number:" + this._MODELLING_CONSTRAINTS_NUM + "\n" +
+                "# M Runtime:" + this._MODELLING_RUNTIME + "\n" +
+                "S Agent name:" + this._SOLVING_AGENT_NAME + "\n" +
+                "# S Predicates number:" + this._SOLVING_PREDICATES_NUM + "\n" +
+                "# S Actions number:" + this._SOLVING_ACTIONS_NUM + "\n" +
+                "# S Variables number:" + this._SOLVING_VARIABLES_NUM + "\n" +
+                "# S Constraints number:" + this._SOLVING_CONSTRAINTS_NUM + "\n" +
+                "# S Runtime:" + this._SOLVING_RUNTIME + "\n" +
+                "# Combining runtime:" + this._COMBINING_RUNTIME + "\n" +
+                "# Solv & Comb runtime:" + this._SOLV_AND_COMB_RUNTIME + "\n" +
+                "# Diagnoses number:" + this._DIAGNOSES_NUM;
+            writer.write(recordString);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception as needed
+        }
     }
 }

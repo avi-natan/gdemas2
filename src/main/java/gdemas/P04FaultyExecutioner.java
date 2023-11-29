@@ -62,6 +62,7 @@ public class P04FaultyExecutioner {
                 List<List<Map<String, String>>> combinedPlanConditions = Parser.computePlanConditions(combinedPlanActions, agentNames.size(), domain);
                 int totalActionsNumber = calculateTotalActionsNumber(combinedPlanActions);
                 double probability = 1.0 / totalActionsNumber;
+
                 for (Integer f: faultNumbers) {
                     // create a fault folder if it doesn't exist
                     File faultFolder05 = new File(problemFolder05, "" + f);
@@ -78,7 +79,7 @@ public class P04FaultyExecutioner {
                             // attempt up to 10 times to generate and execute with given number of faults
                             int attempt = 0;
                             FaultyExecution fe = null;
-                            while (attempt < 10000) {
+                            while (attempt < 1000000) {
                                 fe = executeInstanceWithFaults(problem, agentNames, combinedPlanActions, combinedPlanConditions, f, probability);
                                 if (fe != null) {
                                     break;
@@ -135,18 +136,6 @@ public class P04FaultyExecutioner {
             e.printStackTrace();
             // Handle the exception as needed
         }
-    }
-
-    private static int calculateTotalActionsNumber(List<List<String>> combinedPlanActions) {
-        int res = 0;
-        for (List<String> combinedPlanAction : combinedPlanActions) {
-            for (String s : combinedPlanAction) {
-                if (!s.equals("nop")) {
-                    res += 1;
-                }
-            }
-        }
-        return res;
     }
 
     private static FaultyExecution executeInstanceWithFaults(Problem problem, List<String> agentNames, List<List<String>> combinedPlanActions, List<List<Map<String, String>>> combinedPlanConditions, Integer f, double p) {
