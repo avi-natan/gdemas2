@@ -162,7 +162,7 @@ public class ReasonerSimple extends Reasoner {
     private void constraintTransitionNonEffected() {
         for (int t = 1; t < this._TRAJECTORY.size(); t++) {
             for (String p: this.relevantGroundedPlanPredicates) {
-                if (this.nonEffectedPredicate(p, t-1)) {
+                if (this.nonEffectedPredicate("(" + p + ")", t-1)) {
                     BoolVar v = this.vmap.getValue("S:" + t + ":" + p);
                     BoolVar v_prev = this.vmap.getValue("S:" + (t-1) + ":" + p);
                     this.model.ifOnlyIf(this.model.and(v), this.model.and(v_prev));

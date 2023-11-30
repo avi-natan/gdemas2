@@ -28,7 +28,7 @@ public class Main {
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-//        String p05executionMode = "new";
+        String p05executionMode = "new";
         String[] observabilities = {
 //                "1p",
                 "25p",
@@ -36,10 +36,10 @@ public class Main {
                 "75p",
                 "99p"
         };
-//        P05DiagnosisRunner.execute(p05executionMode, observabilities);
+        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection
-        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
 
 //        manualExecutionWhileWritingAlg();
 //        PlanGenerator p = new PlanGenerator();
@@ -47,23 +47,28 @@ public class Main {
     }
 
     private static void manualExecutionWhileWritingAlg() {
+        // parameters for easier changing
         String benchmarkName = "mastrips";
-        String domainName = "logistics00";
-        String problemName = "probLOGISTICS-4-0";
-        File domainFile = new File("benchmarks - sandbox/mastrips/logistics00/logistics00-domain.pddl");
-        File problemFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/logistics00-probLOGISTICS-4-0.pddl");
-        File agentsFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/logistics00-probLOGISTICS-4-0-agents.txt");
-        File combinedPlanFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/logistics00-probLOGISTICS-4-0-combined_plan.solution");
+        String domainName = "driverlog";
+        String problemName = "pfile15";
+        int faultsNum = 1;
+        int repetitionNum = 0;
 
-        File faultsFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/2/logistics00-probLOGISTICS-4-0-f[2]-r[1]-faults.txt");
-        File trajectoryFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/2/logistics00-probLOGISTICS-4-0-f[2]-r[1]-combined_trajectory.trajectory");
-        File resultsFile = new File("benchmarks - sandbox/mastrips/logistics00/probLOGISTICS-4-0/2/logistics00-probLOGISTICS-4-0-f[2]-r[1]-results.xls");
+        // input files based on the parameters
+        File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");
+        File problemFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + ".pddl");
+        File agentsFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + "-agents.txt");
+        File combinedPlanFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + "-combined_plan.solution");
+        File faultsFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-faults.txt");
+        File trajectoryFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-combined_trajectory.trajectory");
+        File resultsFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-results.xls");
+
         String[] observabilities = {
-                "1p",
-                "25p",
-                "50p",
+//                "1p",
+//                "25p",
+//                "50p",
                 "75p",
-                "99p"
+//                "99p"
         };
         String[] reasoners = {
                 "simple",
@@ -71,44 +76,36 @@ public class Main {
         };
         List<Record> records = new ArrayList<>();
         for (String observability : observabilities) {
-            for (String s: reasoners) {
-                switch (s) {
-                    case "simple":
-                        Reasoner simple = new ReasonerSimple(
-                                benchmarkName,
-                                domainName,
-                                problemName,
-                                domainFile,
-                                problemFile,
-                                agentsFile,
-                                combinedPlanFile,
-                                faultsFile,
-                                trajectoryFile,
-                                observability
-                        );
-                        simple.diagnoseProblem();
-                        records.add(new Record(simple));
-                        print(9);
-                        break;
-                    case "smart":
-                        Reasoner smart = new ReasonerSmart(
-                                benchmarkName,
-                                domainName,
-                                problemName,
-                                domainFile,
-                                problemFile,
-                                agentsFile,
-                                combinedPlanFile,
-                                faultsFile,
-                                trajectoryFile,
-                                observability
-                        );
-                        smart.diagnoseProblem();
-                        records.add(new Record(smart));
-                        print(9);
-                        break;
-                }
-            }
+            Reasoner simple = new ReasonerSimple(
+                    benchmarkName,
+                    domainName,
+                    problemName,
+                    domainFile,
+                    problemFile,
+                    agentsFile,
+                    combinedPlanFile,
+                    faultsFile,
+                    trajectoryFile,
+                    observability
+            );
+            simple.diagnoseProblem();
+            records.add(new Record(simple));
+            print(9);
+            Reasoner smart = new ReasonerSmart(
+                    benchmarkName,
+                    domainName,
+                    problemName,
+                    domainFile,
+                    problemFile,
+                    agentsFile,
+                    combinedPlanFile,
+                    faultsFile,
+                    trajectoryFile,
+                    observability
+            );
+            smart.diagnoseProblem();
+            records.add(new Record(smart));
+            print(9);
         }
         saveRecords(records, resultsFile);
         print(34);
