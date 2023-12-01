@@ -55,10 +55,10 @@ public class Main {
     private static void manualExecutionWhileWritingAlg() {
         // parameters for easier changing
         String benchmarkName = "mastrips";
-        String domainName = "driverlog";
-        String problemName = "pfile15";
-        int faultsNum = 1;
-        int repetitionNum = 0;
+        String domainName = "logistics00";
+        String problemName = "probLOGISTICS-11-1";
+        int faultsNum = 5;
+        int repetitionNum = 6;
 
         // input files based on the parameters
         File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");
@@ -71,9 +71,10 @@ public class Main {
 
         String[] observabilities = {
 //                "1p",
+                "10p",
 //                "25p",
 //                "50p",
-                "75p",
+//                "75p",
 //                "99p"
         };
         String[] reasoners = {

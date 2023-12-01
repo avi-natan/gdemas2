@@ -280,7 +280,7 @@ public class ReasonerSimple extends Reasoner {
 
     private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {
         for (Diagnosis d: diagnoses) {
-            if (d.toString().equals(nd.toString())) {
+            if (d.hash.equals(nd.hash)) {
                 return true;
             }
         }

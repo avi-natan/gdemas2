@@ -8,6 +8,8 @@ import java.util.*;
 public class Diagnosis {
     public final List<String> svals;
     public final List<List<String>> actionHealthStates;
+    public final String hash;
+
     public Diagnosis(Solution s, BijectiveMap<String, BoolVar> vmap, int planLength, int agentsNum) {
         this.svals = new ArrayList<>();
         for (BoolVar b: vmap.values()) {
@@ -33,9 +35,10 @@ public class Diagnosis {
             }
             this.actionHealthStates.add(stepHealthStates);
         }
+        this.hash = this.createHash();
     }
 
-    public String toString () {
+    private String createHash() {
         StringJoiner result = new StringJoiner("\n");
         int i = 0;
         for (List<String> innerList : this.actionHealthStates) {

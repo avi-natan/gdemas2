@@ -450,7 +450,7 @@ public class ReasonerSmart extends Reasoner {
 
     private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {
         for (Diagnosis d: diagnoses) {
-            if (d.toString().equals(nd.toString())) {
+            if (d.hash.equals(nd.hash)) {
                 return true;
             }
         }
@@ -481,13 +481,12 @@ public class ReasonerSmart extends Reasoner {
 
     private void initialPartialGlobalDiagnoses() {
         for (int d = 0; d < this.agentsDiagnoses.get(0).size(); d++) {
-            GlobalDiagnosis gd = new GlobalDiagnosis();
-            gd.actionHealthStates = new ArrayList<>();
+            List<List<String>> actionHealthStates = new ArrayList<>();
             for (List<String> ls: this.agentsDiagnoses.get(0).get(d).actionHealthStates) {
                 List<String> nls = new ArrayList<>(ls);
-                gd.actionHealthStates.add(nls);
+                actionHealthStates.add(nls);
             }
-            gd.constituentDiagnosisIndices = List.of(d);
+            GlobalDiagnosis gd = new GlobalDiagnosis(actionHealthStates, List.of(d));
             this.globalDiagnoses.add(gd);
         }
     }
@@ -561,16 +560,14 @@ public class ReasonerSmart extends Reasoner {
             }
             newHealthStates.add(snhs);
         }
-        GlobalDiagnosis ngd = new GlobalDiagnosis();
-        ngd.actionHealthStates = newHealthStates;
-        ngd.constituentDiagnosisIndices = new ArrayList<>(gd.constituentDiagnosisIndices);
-        ngd.constituentDiagnosisIndices.add(d);
-        return ngd;
+        List<Integer> newConstituentDiagnosisIndices = new ArrayList<>(gd.constituentDiagnosisIndices);
+        newConstituentDiagnosisIndices.add(d);
+        return new GlobalDiagnosis(newHealthStates, newConstituentDiagnosisIndices);
     }
 
     private boolean containsGlobalDiagnosis(List<GlobalDiagnosis> newGlobalDiagnoses, GlobalDiagnosis ngd) {
         for (GlobalDiagnosis gd: newGlobalDiagnoses ) {
-            if (gd.toString().equals(ngd.toString())) {
+            if (gd.hash.equals(ngd.hash)) {
                 return true;
             }
         }
