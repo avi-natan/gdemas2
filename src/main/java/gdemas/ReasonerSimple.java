@@ -271,9 +271,20 @@ public class ReasonerSimple extends Reasoner {
         Solution s = solver.findSolution();
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
-            this.diagnoses.add(d);
+            if (!this.containsDiagnosis(this.diagnoses, d)) {
+                this.diagnoses.add(d);
+            }
             s = solver.findSolution();
         }
+    }
+
+    private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {
+        for (Diagnosis d: diagnoses) {
+            if (d.toString().equals(nd.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void printDiagnoses() {

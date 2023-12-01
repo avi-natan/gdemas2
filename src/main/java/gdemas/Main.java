@@ -31,6 +31,12 @@ public class Main {
         String p05executionMode = "new";
         String[] observabilities = {
 //                "1p",
+//                "5p",
+                "10p",
+                "12p",
+                "15p",
+                "17p",
+                "20p",
                 "25p",
                 "50p",
                 "75p",

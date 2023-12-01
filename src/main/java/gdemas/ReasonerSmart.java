@@ -441,9 +441,20 @@ public class ReasonerSmart extends Reasoner {
         Solution s = solver.findSolution();
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
-            this.agentsDiagnoses.get(A).add(d);
+            if (!this.containsDiagnosis(this.agentsDiagnoses.get(A), d)) {
+                this.agentsDiagnoses.get(A).add(d);
+            }
             s = solver.findSolution();
         }
+    }
+
+    private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {
+        for (Diagnosis d: diagnoses) {
+            if (d.toString().equals(nd.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void combineDiagnoses() {

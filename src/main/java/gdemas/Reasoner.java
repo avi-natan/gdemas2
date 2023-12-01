@@ -141,28 +141,49 @@ public abstract class Reasoner {
                 observableStates.add(0);
                 observableStates.add(statesNumber-1);
                 break;
+            case "5p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 20 == 0) observableStates.add(i);
+                }
+                break;
+            case "10p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 10 == 0) observableStates.add(i);
+                }
+                break;
+            case "12p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 8 == 0) observableStates.add(i);
+                }
+                break;
+            case "15p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 7 == 0) observableStates.add(i);
+                }
+                break;
+            case "17p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 6 == 0) observableStates.add(i);
+                }
+                break;
+            case "20p":
+                for (int i = 0; i < statesNumber; i++) {
+                    if (i % 5 == 0) observableStates.add(i);
+                }
+                break;
             case "25p":
                 for (int i = 0; i < statesNumber; i++) {
                     if (i % 4 == 0) observableStates.add(i);
-                }
-                if (!observableStates.contains(statesNumber-1)) {
-                    observableStates.add(statesNumber-1);
                 }
                 break;
             case "50p":
                 for (int i = 0; i < statesNumber; i++) {
                     if (i % 2 == 0) observableStates.add(i);
                 }
-                if (!observableStates.contains(statesNumber-1)) {
-                    observableStates.add(statesNumber-1);
-                }
                 break;
             case "75p":
                 for (int i = 0; i < statesNumber; i++) {
                     if (i % 4 != 0) observableStates.add(i);
-                }
-                if (!observableStates.contains(statesNumber-1)) {
-                    observableStates.add(statesNumber-1);
                 }
                 break;
             case "99p":
@@ -170,6 +191,8 @@ public abstract class Reasoner {
                     observableStates.add(i);
                 }
                 break;
+            default:
+                throw new RuntimeException("percentage not handled");
         }
 
         if (!observableStates.contains(0)) {
