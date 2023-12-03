@@ -138,7 +138,7 @@ public class P04FaultyExecutioner {
         }
     }
 
-    private static FaultyExecution executeInstanceWithFaults(Problem problem, List<String> agentNames, List<List<String>> combinedPlanActions, List<List<Map<String, String>>> combinedPlanConditions, Integer f, double p) {
+    public static FaultyExecution executeInstanceWithFaults(Problem problem, List<String> agentNames, List<List<String>> combinedPlanActions, List<List<Map<String, String>>> combinedPlanConditions, Integer f, double p) {
         int remainingFaults = f;
         List<String> faults = new ArrayList<>();
         List<List<String>> trajectory = new ArrayList<>();

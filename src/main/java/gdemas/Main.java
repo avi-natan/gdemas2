@@ -19,6 +19,11 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!!!!");
 
+        // Pipeline 03 - plan combiner
+        // execution modes: "new", "continue", "continueSkipFailed"
+        String p03executionMode = "new";
+        P03PlanCombiner.execute(p03executionMode);
+
         // Pipeline 04 - faulty execution
         // execution modes: "new", "continue"
 //        String p04executionMode = "new";
@@ -28,10 +33,10 @@ public class Main {
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p05executionMode = "new";
+        String p05executionMode = "continueSkipFailed";
         String[] observabilities = {
 //                "1p",
-//                "5p",
+                "5p",
                 "10p",
                 "12p",
                 "15p",
@@ -42,7 +47,7 @@ public class Main {
                 "75p",
                 "99p"
         };
-        P05DiagnosisRunner.execute(p05executionMode, observabilities);
+//        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection
 //        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
