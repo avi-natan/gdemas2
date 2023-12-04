@@ -19,34 +19,39 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!!!!");
 
+        // Pipeline 02 - plan generator
+        // execution modes: "new", "continue", "continueSkipFailed"
+        String p02executionMode = "continue";
+        P02PlanGenerator.execute(p02executionMode);
+
         // Pipeline 03 - plan combiner
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p03executionMode = "new";
-        P03PlanCombiner.execute(p03executionMode);
+//        String p03executionMode = "new";
+//        P03PlanCombiner.execute(p03executionMode);
 
         // Pipeline 04 - faulty execution
         // execution modes: "new", "continue"
 //        String p04executionMode = "new";
-        int[] faultNumbers = new int[] {1,2,3,4,5};
-        int repeatNumber = 10;
+//        int[] faultNumbers = new int[] {1};
+//        int repeatNumber = 1;
 //        P04FaultyExecutioner.execute(p04executionMode, faultNumbers, repeatNumber);
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p05executionMode = "continueSkipFailed";
-        String[] observabilities = {
-//                "1p",
-                "5p",
-                "10p",
-                "12p",
-                "15p",
-                "17p",
-                "20p",
-                "25p",
-                "50p",
-                "75p",
-                "99p"
-        };
+//        String p05executionMode = "continueSkipFailed";
+//        String[] observabilities = {
+////                "1p",
+//                "5p",
+//                "10p",
+//                "12p",
+//                "15p",
+//                "17p",
+//                "20p",
+//                "25p",
+//                "50p",
+//                "75p",
+//                "99p"
+//        };
 //        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection

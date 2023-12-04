@@ -58,17 +58,17 @@ public class P03PlanCombiner {
                 List<List<String>> combinedPlan = combinePlan(domain, agentNames, planFile04);
 
                 // prepare the combined plan as a string
-                StringBuilder combinePlanStringBuilder = new StringBuilder();
+                StringBuilder combinedPlanStringBuilder = new StringBuilder();
                 for (List<String> action : combinedPlan) {
                     StringBuilder jointAction = new StringBuilder("[");
                     for (String s : action) {
                         jointAction.append(s).append(",");
                     }
                     jointAction = new StringBuilder(jointAction.substring(0, jointAction.length() - 1) + "]\n");
-                    combinePlanStringBuilder.append(jointAction);
+                    combinedPlanStringBuilder.append(jointAction);
                 }
-                combinePlanStringBuilder.substring(0, combinePlanStringBuilder.length()-1);
-                String combinedPlanString = combinePlanStringBuilder.toString();
+                String combinedPlanString = combinedPlanStringBuilder.toString();
+                combinedPlanString = combinedPlanString.substring(0, combinedPlanString.length()-1);
 
                 // save the combined plan string to disk
                 File combinedPlanFile04 = new File(problemFolder04, domainFolder04.getName() + "-" + problemFolder04.getName() + "-combined_plan.solution");
@@ -94,8 +94,7 @@ public class P03PlanCombiner {
                     String init = String.join(") (", fe.trajectory.get(0));
                     str.append(init).append("))");
                     for (int t = 0; t < combinedPlan.size(); t++){
-                        String jointAction = "(" + String.join(") (", combinedPlan.get(t)) + ")";
-                        jointAction = jointAction.replaceAll("\\(nop", "(nop ");
+                        String jointAction = String.join(" ", combinedPlan.get(t));
                         jointAction = "(operators: " + jointAction + ")";
                         String nextState = "(:state  (" + String.join(") (", fe.trajectory.get(t+1)) + "))";
                         str.append("\r\n").append(jointAction).append("\r\n").append(nextState);
