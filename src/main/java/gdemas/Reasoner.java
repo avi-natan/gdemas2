@@ -2,6 +2,8 @@ package gdemas;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static gdemas.Utils.print;
@@ -106,7 +108,7 @@ public abstract class Reasoner {
         this._DIAGNOSES_NUM             = 0;
     }
 
-    public abstract void diagnoseProblem();
+    public abstract void diagnoseProblem() throws InterruptedException, ExecutionException, TimeoutException ;
 
     protected int countActionsNumber(List<List<String>> planActions) {
         int count = 0;

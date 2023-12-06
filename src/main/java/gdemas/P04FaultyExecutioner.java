@@ -26,6 +26,8 @@ public class P04FaultyExecutioner {
             report.parseFromLastReport(new File("benchmarks/mastrips/05 - faulty executions/report.txt"));
         }
 
+        List<String> specificFilesToCheck = Arrays.asList(Parser.readFromFile(new File("benchmarks/mastrips/05 - faulty executions/specific files to check.txt")).split("\r\n"));
+
         File[] domainFolders = listDirectories(inputFolder);
         for (File domainFolder: domainFolders) {
             File domainFolder05 = new File(outputFolder, domainFolder.getName());
@@ -75,6 +77,16 @@ public class P04FaultyExecutioner {
 
                         // if the faults file exists, continue
                         if (!faultsFile05.exists()) {
+                            // if the specific files to check option is on, check only specific files
+                            if (executionMode.equals("continueSpecific")) {
+                                if (!specificFilesToCheck.contains(faultsFile05.getAbsolutePath())) {
+                                    report.skipped += 1;
+                                    report.skippedFiles.add(faultsFile05.getAbsolutePath());
+                                    print(faultsFile05.getAbsolutePath() + ": skip");
+                                    continue;
+                                }
+                            }
+                            print(faultsFile05.getAbsolutePath() + ": attempt");
                             report.attempts += 1;
                             // attempt up to 10 times to generate and execute with given number of faults
                             int attempt = 0;
@@ -114,14 +126,17 @@ public class P04FaultyExecutioner {
                                     e.printStackTrace();
                                     // Handle the exception as needed
                                 }
-                                print("success");
+                                print(faultsFile05.getAbsolutePath() + ": success");
                                 report.success += 1;
                                 report.successfulFiles.add(faultsFile05.getAbsolutePath());
                             } else {
-                                print("fail");
+                                print(faultsFile05.getAbsolutePath() + ": fail");
                                 report.fail += 1;
                                 report.failedFiles.add(faultsFile05.getAbsolutePath());
                             }
+                        } else {
+                            print(faultsFile05.getAbsolutePath() + ": exists");
+                            report.existed += 1;
                         }
                     }
                 }

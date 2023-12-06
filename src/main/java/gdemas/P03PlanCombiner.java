@@ -78,33 +78,6 @@ public class P03PlanCombiner {
                     e.printStackTrace();
                     // Handle the exception as needed
                 }
-
-                // execute the plan without faults
-                Problem problem = Parser.parseProblem(problemFile04);
-                List<List<String>> combinedPlanActions = Parser.parseCombinedPlan(combinedPlanFile04);
-                List<List<Map<String, String>>> combinedPlanConditions = Parser.computePlanConditions(combinedPlanActions, agentNames.size(), domain);
-                FaultyExecution fe = P04FaultyExecutioner.executeInstanceWithFaults(problem, agentNames, combinedPlanActions, combinedPlanConditions, 0, 0.0);
-
-                // save the non-faulty execution
-                File healthyTrajectory = new File(problemFolder04, domainFolder04.getName() + "-" + problemFolder04.getName() + "-healthy_execution.trajectory");
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(healthyTrajectory))) {
-                    // Create the trajectory string
-                    StringBuilder str = new StringBuilder("((:init  (");
-                    assert fe != null;
-                    String init = String.join(") (", fe.trajectory.get(0));
-                    str.append(init).append("))");
-                    for (int t = 0; t < combinedPlan.size(); t++){
-                        String jointAction = String.join(" ", combinedPlan.get(t));
-                        jointAction = "(operators: " + jointAction + ")";
-                        String nextState = "(:state  (" + String.join(") (", fe.trajectory.get(t+1)) + "))";
-                        str.append("\r\n").append(jointAction).append("\r\n").append(nextState);
-                    }
-                    str.append("\r\n)");
-                    writer.write(str.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    // Handle the exception as needed
-                }
             }
         }
 
@@ -204,7 +177,7 @@ public class P03PlanCombiner {
             if (a != A) {
                 for (Action act: actions.get(a)) {
                     if (action.actionOriginalStep < act.actionOriginalStep) {
-                        if (someEffectedArePreconditions(action.effectedPredicates, act.preconditions)) {
+                        if (someEffectedArePreconditions(action.effectedPredicates, act.preconditions) || someEffectedArePreconditions(act.effectedPredicates, action.preconditions)) {
                             action.effectedActions.add(act);
                             act.effectingActions.add(action);
                         }

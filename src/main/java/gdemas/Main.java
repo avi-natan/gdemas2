@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static gdemas.Utils.print;
 import static gdemas.Utils.listDirectories;
@@ -21,38 +23,40 @@ public class Main {
 
         // Pipeline 02 - plan generator
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p02executionMode = "continue";
-        P02PlanGenerator.execute(p02executionMode);
+//        String p02executionMode = "continue";
+//        P02PlanGenerator.execute(p02executionMode);
+//        P02PlanValidator.execute();
 
         // Pipeline 03 - plan combiner
         // execution modes: "new", "continue", "continueSkipFailed"
 //        String p03executionMode = "new";
 //        P03PlanCombiner.execute(p03executionMode);
+//        P03PlanValidator.execute();
 
         // Pipeline 04 - faulty execution
-        // execution modes: "new", "continue"
-//        String p04executionMode = "new";
-//        int[] faultNumbers = new int[] {1};
-//        int repeatNumber = 1;
+        // execution modes: "new", "continue", "continueSpecific"
+//        String p04executionMode = "continueSpecific";
+        int[] faultNumbers = new int[] {1,2,3,4,5};
+        int repeatNumber = 10;
 //        P04FaultyExecutioner.execute(p04executionMode, faultNumbers, repeatNumber);
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-//        String p05executionMode = "continueSkipFailed";
-//        String[] observabilities = {
-////                "1p",
-//                "5p",
-//                "10p",
-//                "12p",
-//                "15p",
-//                "17p",
-//                "20p",
-//                "25p",
-//                "50p",
-//                "75p",
-//                "99p"
-//        };
-//        P05DiagnosisRunner.execute(p05executionMode, observabilities);
+        String p05executionMode = "new";
+        String[] observabilities = {
+//                "1p",
+                "5p",
+                "10p",
+                "12p",
+                "15p",
+                "17p",
+                "20p",
+                "25p",
+                "50p",
+                "75p",
+                "99p"
+        };
+        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection
 //        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
@@ -105,7 +109,11 @@ public class Main {
                     trajectoryFile,
                     observability
             );
-            simple.diagnoseProblem();
+            try {
+                simple.diagnoseProblem();
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
             records.add(new Record(simple));
             print(9);
             Reasoner smart = new ReasonerSmart(
@@ -120,7 +128,11 @@ public class Main {
                     trajectoryFile,
                     observability
             );
-            smart.diagnoseProblem();
+            try {
+                smart.diagnoseProblem();
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
             records.add(new Record(smart));
             print(9);
         }

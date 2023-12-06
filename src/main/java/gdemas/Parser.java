@@ -135,6 +135,12 @@ public class Parser {
         return combinedPlan;
     }
 
+    public static List<String> parsePlan(File planFile) {
+        String planString = readFromFile(planFile);
+        String[] actions = planString.split("\r\n");
+        return Arrays.asList(actions);
+    }
+
     public static List<List<Map<String, String>>> computePlanConditions(List<List<String>> planActions, int agentsNum, Domain domain) {
         List<List<Map<String, String>>> pc = new ArrayList<>();
         for (int t = 0; t < planActions.size(); t++) {
