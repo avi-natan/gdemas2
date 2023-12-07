@@ -23,10 +23,16 @@ public class P04FaultyExecutioner {
         } else {
             report = new Report();
             report.executionType = "continue";
-            report.parseFromLastReport(new File("benchmarks/mastrips/05 - faulty executions/report.txt"));
+            File lastReportFile = new File("benchmarks/mastrips/05 - faulty executions/report.txt");
+            if (lastReportFile.exists()) {
+                report.parseFromLastReport(lastReportFile);
+            }
         }
 
-        List<String> specificFilesToCheck = Arrays.asList(Parser.readFromFile(new File("benchmarks/mastrips/05 - faulty executions/specific files to check.txt")).split("\r\n"));
+        List<String> specificFilesToCheck = new ArrayList<>();
+        if (executionMode.equals("continueSpecific")) {
+            specificFilesToCheck = Arrays.asList(Parser.readFromFile(new File("benchmarks/mastrips/05 - faulty executions/specific files to check.txt")).split("\r\n"));
+        }
 
         File[] domainFolders = listDirectories(inputFolder);
         for (File domainFolder: domainFolders) {
@@ -143,7 +149,7 @@ public class P04FaultyExecutioner {
             }
         }
 
-        report.totalExisting = report.totalExistingLast + report.success;
+        report.totalExisting = report.existed + report.success;
         File reportFile = new File("benchmarks/mastrips/05 - faulty executions/report.txt");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(reportFile))) {
             writer.write(report.toString());

@@ -106,7 +106,7 @@ public class ReasonerSmart extends Reasoner {
     }
 
     @Override
-    public void diagnoseProblem() throws InterruptedException, ExecutionException, TimeoutException {
+    public void diagnoseProblem() {
         for (int A = 0; A < this._AGENTS_NUM; A++) {
             // create the model
             this.model = new Model();
@@ -118,6 +118,7 @@ public class ReasonerSmart extends Reasoner {
             this.vmap = new BijectiveMap<>();
 
             // model problem
+            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + "modelling...");
             Instant start = Instant.now();
             this.modelProblem(A);
             Instant end = Instant.now();
@@ -140,33 +141,11 @@ public class ReasonerSmart extends Reasoner {
 
 //            print(999);
 
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            // Create a runnable representing the solve task
-            int finalA = A;
-            print ("agent " + A + "/" + this._AGENTS_NUM);
-            Runnable task = () -> {
-                this.solveProblem(finalA);
-            };
-
-            try {
-                start = Instant.now();
-                // Submit the task to the executor
-                Future<?> future = executor.submit(task);
-                // Set a timeout of 1 minute
-                future.get(100, TimeUnit.MILLISECONDS);
-                end = Instant.now();
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                // Forward all caught exceptions up the call stack
-                throw e;
-            } finally {
-                // Shutdown the executor
-                executor.shutdown();
-            }
-
             // solve problem
-//            start = Instant.now();
-//            this.solveProblem(A);
-//            end = Instant.now();
+            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + "solving...");
+            start = Instant.now();
+            this.solveProblem(A);
+            end = Instant.now();
             runtime = Duration.between(start, end).toMillis();
             if (A == 0) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(A);
@@ -186,6 +165,7 @@ public class ReasonerSmart extends Reasoner {
         }
 
         // combining diagnoses
+        print(java.time.LocalTime.now() + ": " + "combining...");
         Instant start = Instant.now();
         this.combineDiagnoses();
         Instant end = Instant.now();

@@ -115,7 +115,7 @@ public class P05DiagnosisRunner {
                                                     success = true;
                                                     break;
                                                 } catch (OutOfMemoryError | Exception e) {
-                                                    print(e.toString());
+                                                    e.printStackTrace();
                                                     attempt += 1;
                                                 }
                                             }
@@ -128,7 +128,7 @@ public class P05DiagnosisRunner {
                                                     success = true;
                                                     break;
                                                 } catch (OutOfMemoryError | Exception e) {
-                                                    print(e.toString());
+                                                    e.printStackTrace();
                                                     attempt += 1;
                                                 }
                                             }

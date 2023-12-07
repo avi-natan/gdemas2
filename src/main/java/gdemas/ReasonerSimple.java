@@ -55,7 +55,7 @@ public class ReasonerSimple extends Reasoner {
     }
 
     @Override
-    public void diagnoseProblem() throws InterruptedException, ExecutionException, TimeoutException {
+    public void diagnoseProblem() {
         // create the model
         this.model = new Model();
 
@@ -66,6 +66,7 @@ public class ReasonerSimple extends Reasoner {
         this.vmap = new BijectiveMap<>();
 
         // model problem
+        print(java.time.LocalTime.now() + ": " + "modelling...");
         Instant start = Instant.now();
         this.modelProblem();
         Instant end = Instant.now();
@@ -77,29 +78,12 @@ public class ReasonerSimple extends Reasoner {
         this._MODELLING_RUNTIME = Duration.between(start, end).toMillis();
 
 //        print(999);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        // Create a runnable representing the solve task
-        Runnable task = this::solveProblem;
-
-        try {
-            start = Instant.now();
-            // Submit the task to the executor
-            Future<?> future = executor.submit(task);
-            // Set a timeout of 1 minute
-            future.get(100, TimeUnit.MILLISECONDS);
-            end = Instant.now();
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            // Forward all caught exceptions up the call stack
-            throw e;
-        } finally {
-            // Shutdown the executor
-            executor.shutdown();
-        }
 
         // solve problem
-//        start = Instant.now();
-//        this.solveProblem();
-//        end = Instant.now();
+        print(java.time.LocalTime.now() + ": " + "solving...");
+        start = Instant.now();
+        this.solveProblem();
+        end = Instant.now();
         this._SOLVING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
         this._SOLVING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
         this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);

@@ -35,26 +35,26 @@ public class Main {
 
         // Pipeline 04 - faulty execution
         // execution modes: "new", "continue", "continueSpecific"
-//        String p04executionMode = "continueSpecific";
+//        String p04executionMode = "continue";
         int[] faultNumbers = new int[] {1,2,3,4,5};
         int repeatNumber = 10;
 //        P04FaultyExecutioner.execute(p04executionMode, faultNumbers, repeatNumber);
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p05executionMode = "new";
+        String p05executionMode = "continue";
         String[] observabilities = {
 //                "1p",
-                "5p",
-                "10p",
-                "12p",
-                "15p",
+//                "5p",
+//                "10p",
+//                "12p",
+//                "15p",
                 "17p",
-                "20p",
-                "25p",
-                "50p",
-                "75p",
-                "99p"
+//                "20p",
+//                "25p",
+//                "50p",
+//                "75p",
+//                "99p"
         };
         P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
@@ -109,11 +109,7 @@ public class Main {
                     trajectoryFile,
                     observability
             );
-            try {
-                simple.diagnoseProblem();
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
-            }
+            simple.diagnoseProblem();
             records.add(new Record(simple));
             print(9);
             Reasoner smart = new ReasonerSmart(
@@ -128,11 +124,7 @@ public class Main {
                     trajectoryFile,
                     observability
             );
-            try {
-                smart.diagnoseProblem();
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
-            }
+            smart.diagnoseProblem();
             records.add(new Record(smart));
             print(9);
         }
