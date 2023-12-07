@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gdemas.Utils.print;
@@ -153,6 +154,7 @@ public class ReasonerSmart extends Reasoner {
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
                 this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
                 this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(A).size();
                 this._SOLVING_RUNTIME = runtime;
             } else if (runtime > this._SOLVING_RUNTIME) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(A);
@@ -160,6 +162,7 @@ public class ReasonerSmart extends Reasoner {
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(A));
                 this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
                 this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(A).size();
                 this._SOLVING_RUNTIME = runtime;
             }
         }
@@ -171,6 +174,9 @@ public class ReasonerSmart extends Reasoner {
         Instant end = Instant.now();
         this._COMBINING_RUNTIME = Duration.between(start, end).toMillis();
         this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
+        this._LOCAL_DIAGNOSES_NUMBERS = this.agentsDiagnoses.stream().map(List::size).collect(Collectors.toList()).toString();
+        this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
+        this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
 
 //        this.printDiagnoses();

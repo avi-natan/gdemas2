@@ -89,11 +89,15 @@ public class ReasonerSimple extends Reasoner {
         this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);
         this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
         this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+        this._SOLVING_DIAGNOSES_NUM = this.diagnoses.size();
         this._SOLVING_RUNTIME = Duration.between(start, end).toMillis();
 
         // combine diagnoses
         this._COMBINING_RUNTIME = 0;
         this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME;
+        this._LOCAL_DIAGNOSES_NUMBERS = "[" + this.diagnoses.size() + "]";
+        this._LOCAL_DIAGNOSES_MIN = this.diagnoses.size();
+        this._LOCAL_DIAGNOSES_MAX = this.diagnoses.size();
         this._DIAGNOSES_NUM = this.diagnoses.size();
 
         // print diagnoses

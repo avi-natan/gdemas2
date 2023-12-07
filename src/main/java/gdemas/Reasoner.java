@@ -46,9 +46,13 @@ public abstract class Reasoner {
     public int                              _SOLVING_ACTIONS_NUM;
     public int                              _SOLVING_VARIABLES_NUM;
     public int                              _SOLVING_CONSTRAINTS_NUM;
+    public int                              _SOLVING_DIAGNOSES_NUM;
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _SOLV_AND_COMB_RUNTIME;
+    public String                           _LOCAL_DIAGNOSES_NUMBERS;
+    public int                              _LOCAL_DIAGNOSES_MIN;
+    public int                              _LOCAL_DIAGNOSES_MAX;
     public int                              _DIAGNOSES_NUM;
 
     public Reasoner(String  benchmarkName,
@@ -100,9 +104,13 @@ public abstract class Reasoner {
         this._SOLVING_ACTIONS_NUM       = 0;
         this._SOLVING_VARIABLES_NUM     = 0;
         this._SOLVING_CONSTRAINTS_NUM   = 0;
+        this._SOLVING_DIAGNOSES_NUM     = 0;
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
         this._SOLV_AND_COMB_RUNTIME     = 0;
+        this._LOCAL_DIAGNOSES_NUMBERS   = "";
+        this._LOCAL_DIAGNOSES_MIN       = 0;
+        this._LOCAL_DIAGNOSES_MAX       = 0;
         this._DIAGNOSES_NUM             = 0;
     }
 
@@ -280,6 +288,9 @@ public abstract class Reasoner {
     public int getSolvingConstraintsNum() {
         return _SOLVING_CONSTRAINTS_NUM;
     }
+    public int getSolvingDiagnosesNum() {
+        return this._SOLVING_DIAGNOSES_NUM;
+    }
     public long getSolvingRuntime() {
         return _SOLVING_RUNTIME;
     }
@@ -288,6 +299,15 @@ public abstract class Reasoner {
     }
     public long getSolvAndCombRuntime() {
         return _SOLV_AND_COMB_RUNTIME;
+    }
+    public String getLocalDiagnosesNumbers () {
+        return this._LOCAL_DIAGNOSES_NUMBERS;
+    }
+    public int getLocalDiagnosesMin () {
+        return this._LOCAL_DIAGNOSES_MIN;
+    }
+    public int getLocalDiagnosesMax () {
+        return this._LOCAL_DIAGNOSES_MAX;
     }
     public int getDiagnosesNum() {
         return _DIAGNOSES_NUM;

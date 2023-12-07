@@ -35,9 +35,13 @@ public class Record {
             "# S Actions number",
             "# S Variables number",
             "# S Constraints number",
+            "# S Diagnoses number",
             "# S Runtime",
             "# Combining runtime",
             "# Solv & Comb runtime",
+            "Local diagnoses numbers",
+            "# Local diagnoses min",
+            "# Local diagnoses max",
             "# Diagnoses number"
     };
 
@@ -70,9 +74,13 @@ public class Record {
     public int                              _SOLVING_ACTIONS_NUM;
     public int                              _SOLVING_VARIABLES_NUM;
     public int                              _SOLVING_CONSTRAINTS_NUM;
+    public int                              _SOLVING_DIAGNOSES_NUM;
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _SOLV_AND_COMB_RUNTIME;
+    public String                           _LOCAL_DIAGNOSES_NUMBERS;
+    public int                              _LOCAL_DIAGNOSES_MIN;
+    public int                              _LOCAL_DIAGNOSES_MAX;
     public int                              _DIAGNOSES_NUM;
 
     public Record(Reasoner r) {
@@ -105,9 +113,13 @@ public class Record {
         this._SOLVING_ACTIONS_NUM       = r.getSolvingActionsNum();
         this._SOLVING_VARIABLES_NUM     = r.getSolvingVariablesNum();
         this._SOLVING_CONSTRAINTS_NUM   = r.getSolvingConstraintsNum();
+        this._SOLVING_DIAGNOSES_NUM     = r.getSolvingDiagnosesNum();
         this._SOLVING_RUNTIME           = r.getSolvingRuntime();
         this._COMBINING_RUNTIME         = r.getCombiningRuntime();
         this._SOLV_AND_COMB_RUNTIME     = r.getSolvAndCombRuntime();
+        this._LOCAL_DIAGNOSES_NUMBERS   = r.getLocalDiagnosesNumbers();
+        this._LOCAL_DIAGNOSES_MIN       = r.getLocalDiagnosesMin();
+        this._LOCAL_DIAGNOSES_MAX       = r.getLocalDiagnosesMax();
         this._DIAGNOSES_NUM             = r.getDiagnosesNum();
     }
 
@@ -140,9 +152,13 @@ public class Record {
         row.createCell(c++).setCellValue(this._SOLVING_ACTIONS_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_VARIABLES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_CONSTRAINTS_NUM);
+        row.createCell(c++).setCellValue(this._SOLVING_DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
         row.createCell(c++).setCellValue(this._SOLV_AND_COMB_RUNTIME);
+        row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
         row.createCell(c).setCellValue(this._DIAGNOSES_NUM);
     }
 
@@ -175,9 +191,13 @@ public class Record {
                 "# S Actions number:" + this._SOLVING_ACTIONS_NUM + "\n" +
                 "# S Variables number:" + this._SOLVING_VARIABLES_NUM + "\n" +
                 "# S Constraints number:" + this._SOLVING_CONSTRAINTS_NUM + "\n" +
+                "# S Diagnoses number:" + this._SOLVING_DIAGNOSES_NUM + "\n" +
                 "# S Runtime:" + this._SOLVING_RUNTIME + "\n" +
                 "# Combining runtime:" + this._COMBINING_RUNTIME + "\n" +
                 "# Solv & Comb runtime:" + this._SOLV_AND_COMB_RUNTIME + "\n" +
+                "Local diagnoses numbers:" + this._LOCAL_DIAGNOSES_NUMBERS + "\n" +
+                "# Local diagnoses min:" + this._LOCAL_DIAGNOSES_MIN + "\n" +
+                "# Local diagnoses max:" + this._LOCAL_DIAGNOSES_MAX + "\n" +
                 "# Diagnoses number:" + this._DIAGNOSES_NUM;
             writer.write(recordString);
         } catch (IOException e) {

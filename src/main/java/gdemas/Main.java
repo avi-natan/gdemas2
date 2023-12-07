@@ -42,19 +42,19 @@ public class Main {
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p05executionMode = "continue";
+        String p05executionMode = "new";
         String[] observabilities = {
 //                "1p",
 //                "5p",
 //                "10p",
 //                "12p",
 //                "15p",
-                "17p",
+//                "17p",
 //                "20p",
 //                "25p",
 //                "50p",
 //                "75p",
-//                "99p"
+                "99p"
         };
         P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
