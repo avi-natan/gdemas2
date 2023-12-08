@@ -510,9 +510,9 @@ public class ReasonerSmart extends Reasoner {
     }
 
     private void initialPartialGlobalDiagnoses(int A) {
-        for (int d = 0; d < this.agentsDiagnoses.get(0).size(); d++) {
+        for (int d = 0; d < this.agentsDiagnoses.get(A).size(); d++) {
             List<List<String>> actionHealthStates = new ArrayList<>();
-            for (List<String> ls: this.agentsDiagnoses.get(0).get(d).actionHealthStates) {
+            for (List<String> ls: this.agentsDiagnoses.get(A).get(d).actionHealthStates) {
                 List<String> nls = new ArrayList<>(ls);
                 actionHealthStates.add(nls);
             }
