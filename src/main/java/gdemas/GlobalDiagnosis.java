@@ -5,11 +5,13 @@ import java.util.StringJoiner;
 
 public class GlobalDiagnosis {
     public List<List<String>> actionHealthStates;
+    public List<Integer> constituentDiagnosisAgents;
     public List<Integer> constituentDiagnosisIndices;
     public String hash;
 
-    public GlobalDiagnosis(List<List<String>> newHealthStates, List<Integer> newConstituentDiagnosisIndices) {
+    public GlobalDiagnosis(List<List<String>> newHealthStates, List<Integer> constituentDiagnosisAgents, List<Integer> newConstituentDiagnosisIndices) {
         this.actionHealthStates = newHealthStates;
+        this.constituentDiagnosisAgents = constituentDiagnosisAgents;
         this.constituentDiagnosisIndices = newConstituentDiagnosisIndices;
         this.hash = this.createHash();
     }

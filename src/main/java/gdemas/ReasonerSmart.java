@@ -165,6 +165,7 @@ public class ReasonerSmart extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(A).size();
                 this._SOLVING_RUNTIME = runtime;
             }
+            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(A).size() + " diagnoses");
         }
 
         // combining diagnoses
@@ -468,16 +469,18 @@ public class ReasonerSmart extends Reasoner {
     }
 
     private void combineDiagnoses() {
+        List<Integer> sortedByLocalDiagnosesNum = sortByLocalDiagnosesNum(this.agentsDiagnoses);
+
         // creating partial global diagnoses out of the local diagnoses of the first agent
-        initialPartialGlobalDiagnoses();
+        initialPartialGlobalDiagnoses(sortedByLocalDiagnosesNum.get(0));
 
         // combining the global diagnoses with the local diagnoses of every subsequent agent
-        for (int a = 1; a < this._AGENTS_NUM; a++) {
+        for (int a = 1; a < sortedByLocalDiagnosesNum.size(); a++) {
             List<GlobalDiagnosis> newGlobalDiagnoses = new ArrayList<>();
             for (GlobalDiagnosis gd: this.globalDiagnoses) {
-                for (int d = 0; d < this.agentsDiagnoses.get(a).size(); d++) {
-                    Diagnosis ld = this.agentsDiagnoses.get(a).get(d);
-                    GlobalDiagnosis ngd = createNewGlobalDiagnosis(gd, ld, d);
+                for (int d = 0; d < this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).size(); d++) {
+                    Diagnosis ld = this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).get(d);
+                    GlobalDiagnosis ngd = createNewGlobalDiagnosis(gd, ld, sortedByLocalDiagnosesNum.get(a), d);
                     if (ngd != null) {
                         if (!this.containsGlobalDiagnosis(newGlobalDiagnoses, ngd)) {
                             newGlobalDiagnoses.add(ngd);
@@ -489,19 +492,36 @@ public class ReasonerSmart extends Reasoner {
         }
     }
 
-    private void initialPartialGlobalDiagnoses() {
+    private List<Integer> sortByLocalDiagnosesNum(List<List<Diagnosis>> agentsDiagnoses) {
+        List<Integer> sortedByLocalDiagnosesNum = new ArrayList<>();
+
+        List<Pair> pairs = new ArrayList<>();
+        for (int a = 0; a < agentsDiagnoses.size(); a++) {
+            pairs.add(new Pair(a, agentsDiagnoses.get(a).size()));
+        }
+
+        pairs.sort(Comparator.comparing(Pair::getLocalDiagnosesNum));
+
+        for (Pair p : pairs) {
+            sortedByLocalDiagnosesNum.add(p.getAgentNum());
+        }
+
+        return sortedByLocalDiagnosesNum;
+    }
+
+    private void initialPartialGlobalDiagnoses(int A) {
         for (int d = 0; d < this.agentsDiagnoses.get(0).size(); d++) {
             List<List<String>> actionHealthStates = new ArrayList<>();
             for (List<String> ls: this.agentsDiagnoses.get(0).get(d).actionHealthStates) {
                 List<String> nls = new ArrayList<>(ls);
                 actionHealthStates.add(nls);
             }
-            GlobalDiagnosis gd = new GlobalDiagnosis(actionHealthStates, List.of(d));
+            GlobalDiagnosis gd = new GlobalDiagnosis(actionHealthStates, List.of(A), List.of(d));
             this.globalDiagnoses.add(gd);
         }
     }
 
-    private GlobalDiagnosis createNewGlobalDiagnosis(GlobalDiagnosis gd, Diagnosis ld, int d) {
+    private GlobalDiagnosis createNewGlobalDiagnosis(GlobalDiagnosis gd, Diagnosis ld, int A, int d) {
         List<List<String>> newHealthStates = new ArrayList<>();
         for (int t = 0; t < gd.actionHealthStates.size(); t++) {
             List<String> snhs = new ArrayList<>();
@@ -570,9 +590,11 @@ public class ReasonerSmart extends Reasoner {
             }
             newHealthStates.add(snhs);
         }
+        List<Integer> newConstituentDiagnosisAgents = new ArrayList<>(gd.constituentDiagnosisAgents);
+        newConstituentDiagnosisAgents.add(A);
         List<Integer> newConstituentDiagnosisIndices = new ArrayList<>(gd.constituentDiagnosisIndices);
         newConstituentDiagnosisIndices.add(d);
-        return new GlobalDiagnosis(newHealthStates, newConstituentDiagnosisIndices);
+        return new GlobalDiagnosis(newHealthStates, newConstituentDiagnosisAgents, newConstituentDiagnosisIndices);
     }
 
     private boolean containsGlobalDiagnosis(List<GlobalDiagnosis> newGlobalDiagnoses, GlobalDiagnosis ngd) {
