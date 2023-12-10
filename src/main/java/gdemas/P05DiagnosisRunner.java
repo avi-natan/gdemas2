@@ -140,7 +140,7 @@ public class P05DiagnosisRunner {
                                         failTxt.delete();
                                         record = new Record(reasoner);
                                         saveRecordToTxtFile(record, resultsFile06r);
-                                        print(java.time.LocalTime.now() + ": " + "success " + record._SOLVING_RUNTIME);
+                                        print(java.time.LocalTime.now() + ": " + "success " + record._SOLV_AND_COMB_RUNTIME);
                                         report.success += 1;
                                         report.successfulFiles.add(resultsFile06r.getAbsolutePath());
                                     } else {

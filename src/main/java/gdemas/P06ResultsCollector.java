@@ -38,27 +38,28 @@ public class P06ResultsCollector {
                             File resultSmart = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                     "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-smart-results.txt");
+                            print(resultSimple.getAbsolutePath());
                             if (resultSimple.exists() && resultSmart.exists()) {
                                 records.add(createSuccessfulRecord(resultSimple, "yes"));
                                 records.add(createSuccessfulRecord(resultSmart, "yes"));
-                                print("both");
+//                                print("both");
                                 countYes += 2;
                             } else if (resultSimple.exists() && !resultSmart.exists()) {
                                 records.add(createSuccessfulRecord(resultSimple, "no"));
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "smart"));
-                                print("simple");
+//                                print("simple");
                                 countYes += 1;
                                 countNo += 1;
                             } else if (!resultSimple.exists() && resultSmart.exists()) {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
                                 records.add(createSuccessfulRecord(resultSmart, "no"));
-                                print("smart");
+//                                print("smart");
                                 countNo += 1;
                                 countYes += 1;
                             } else {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "smart"));
-                                print("none");
+//                                print("none");
                                 countNo += 2;
                             }
 
