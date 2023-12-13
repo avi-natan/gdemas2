@@ -129,7 +129,7 @@ public class Parser {
         String[] jointActions = combinedPlanFileString.substring(1, combinedPlanFileString.length()-1).replaceAll("\\(nop \\)", "(nop)").split("]\\s*\\[");
         List<List<String>> combinedPlan = new ArrayList<>();
         for (String s : jointActions) {
-            List<String> actions = new ArrayList<>(Arrays.asList(s.substring(1, s.length()-1).split("\\),\\(")));
+            List<String> actions = new ArrayList<>(Arrays.asList(s.split(",")));
             combinedPlan.add(actions);
         }
         return combinedPlan;
@@ -157,11 +157,11 @@ public class Parser {
     }
 
     private static String extractActionGroundedConditions(List<List<String>> planActions, int t, int a, String conditionsType, Domain domain) {
-        if (planActions.get(t).get(a).equals("nop")) {
+        if (planActions.get(t).get(a).equals("(nop)")) {
             return "";
         } else {
             String groundedAction = planActions.get(t).get(a);
-            String[] actionSignature = groundedAction.split(" ");
+            String[] actionSignature = groundedAction.substring(1, groundedAction.length()-1).split(" ");
             String actionName = actionSignature[0];
             String[] actionArguments = Arrays.copyOfRange(actionSignature, 1, actionSignature.length);
             String conditions = domain.actions.get(actionName).get(conditionsType);
@@ -185,7 +185,7 @@ public class Parser {
         List<List<String>> trajectory = new ArrayList<>();
         for (int i = 0; i < sequence.length; i=i+2) {
             String s = sequence[i];
-            List<String> l = new ArrayList<>(Arrays.asList(s.substring(2, s.length()-2).split("\\) \\(")));
+            List<String> l = new ArrayList<>(Arrays.asList(s.substring(1, s.length()-1).split("(?=\\() |(?<=\\)) ")));
             trajectory.add(l);
         }
         return trajectory;
@@ -196,7 +196,7 @@ public class Parser {
         double[] agentActionNumbers = new double[agentsNum];
         for (List<String> combinedPlanAction : planActions) {
             for (int a = 0; a < agentsNum; a++) {
-                if (!combinedPlanAction.get(a).equals("nop")) {
+                if (!combinedPlanAction.get(a).equals("(nop)")) {
                     agentActionNumbers[a] += 1;
                     totalNumberOfActions += 1;
                 }

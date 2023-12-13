@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gdemas.Utils.print;
-
 public abstract class Reasoner {
     // Operational members
     public Domain                           _DOMAIN;
@@ -120,7 +118,7 @@ public abstract class Reasoner {
         int count = 0;
         for (List<String> planAction : planActions) {
             for (String s : planAction) {
-                if (!s.equals("nop")) {
+                if (!s.equals("(nop)")) {
                     count += 1;
                 }
             }
@@ -134,9 +132,7 @@ public abstract class Reasoner {
             List<String> cndPredicates = Arrays.asList(cnd.split("(?=\\() |(?<=\\)) "));
             for (int i = 0; i < cndPredicates.size(); i++) {
                 if (cndPredicates.get(i).contains("(not ")) {
-                    cndPredicates.set(i, cndPredicates.get(i).substring(6, cndPredicates.get(i).length()-2));
-                } else {
-                    cndPredicates.set(i, cndPredicates.get(i).substring(1, cndPredicates.get(i).length()-1));
+                    cndPredicates.set(i, cndPredicates.get(i).substring(5, cndPredicates.get(i).length()-1));
                 }
             }
             predicatesList.addAll(cndPredicates.stream().filter(s -> !predicatesList.contains(s)).collect(Collectors.toList()));

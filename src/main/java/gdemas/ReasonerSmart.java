@@ -70,12 +70,12 @@ public class ReasonerSmart extends Reasoner {
                 List<String> stepPlanActions = new ArrayList<>();
                 for (int a = 0; a < this._AGENTS_NUM; a++) {
                     String aStepAction = this._COMBINED_PLAN_ACTIONS.get(t).get(a);
-                    if (aStepAction.equals("nop")) {
-                        stepPlanActions.add("nop");
+                    if (aStepAction.equals("(nop)")) {
+                        stepPlanActions.add("(nop)");
                     } else if (this.actionIsRelevantToAgentA(A, t, a)) {
                         stepPlanActions.add(aStepAction);
                     } else {
-                        stepPlanActions.add("nop");
+                        stepPlanActions.add("(nop)");
                     }
                 }
                 singleAgentPlanActions.add(stepPlanActions);
@@ -118,8 +118,18 @@ public class ReasonerSmart extends Reasoner {
             // initialize the variable map
             this.vmap = new BijectiveMap<>();
 
+//            // print some metadata
+//            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": metadata:");
+//            print("Relevant predicates number: " + this.agentsPredicates.get(A).size());
+//            print("Relevant actions number: " + this.countActionsNumber(this.agentsPlanActions.get(A)));
+//            double external = this.countExternalActions(A);
+//            double internal = this.countInternalActions(A);
+//            print("Relevant external actions number: " + external);
+//            print("Relevant internal actions number: " + internal);
+//            print("External/Internal actions rate: " + external / internal);
+
             // model problem
-            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + "modelling...");
+            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "modelling...");
             Instant start = Instant.now();
             this.modelProblem(A);
             Instant end = Instant.now();
@@ -143,7 +153,7 @@ public class ReasonerSmart extends Reasoner {
 //            print(999);
 
             // solve problem
-            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + "solving...");
+            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
             start = Instant.now();
             this.solveProblem(A);
             end = Instant.now();
@@ -165,7 +175,8 @@ public class ReasonerSmart extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(A).size();
                 this._SOLVING_RUNTIME = runtime;
             }
-            print(java.time.LocalTime.now() + " agent " + A + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(A).size() + " diagnoses");
+            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(A).size() + " diagnoses");
+            print("");
         }
 
         // combining diagnoses
@@ -179,9 +190,38 @@ public class ReasonerSmart extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._SOLV_AND_COMB_RUNTIME);
 
 //        this.printDiagnoses();
     }
+
+//    private double countExternalActions(int A) {
+//        int count = 0;
+//        for (List<String> planAction : this.agentsPlanActions.get(A)) {
+//            for (int a = 0; a < planAction.size(); a++) {
+//                if (a!=A) {
+//                    if (!planAction.get(a).equals("(nop)")) {
+//                        count += 1;
+//                    }
+//                }
+//            }
+//        }
+//        return count;
+//    }
+//
+//    private double countInternalActions(int A) {
+//        int count = 0;
+//        for (List<String> planAction : this.agentsPlanActions.get(A)) {
+//            for (int a = 0; a < planAction.size(); a++) {
+//                if (a==A) {
+//                    if (!planAction.get(a).equals("(nop)")) {
+//                        count += 1;
+//                    }
+//                }
+//            }
+//        }
+//        return count;
+//    }
 
     private void modelProblem(int A) {
         // initialize state variables
@@ -229,7 +269,7 @@ public class ReasonerSmart extends Reasoner {
     private void initializeHealthVariables(int A) {
         for (int t = 0; t < this.agentsPlanActions.get(A).size(); t++) {
             for (int a = 0; a < this.agentsPlanActions.get(A).get(t).size(); a++) {
-                if (!this.agentsPlanActions.get(A).get(t).get(a).equals("nop")) {
+                if (!this.agentsPlanActions.get(A).get(t).get(a).equals("(nop)")) {
                     if (a == A) {
                         this.vmap.put("H:" + t + ":" + a + ":h", this.model.boolVar("x" + this.xi++));
                         this.vmap.put("H:" + t + ":" + a + ":f", this.model.boolVar("x" + this.xi++));
@@ -269,7 +309,7 @@ public class ReasonerSmart extends Reasoner {
     private void constraintTransitionNonEffected(int A) {
         for (int t = 1; t < this._TRAJECTORY.size(); t++) {
             for (String p: this.agentsPredicates.get(A)) {
-                if (this.nonEffectedPredicate(A, "(" + p + ")", t-1)) {
+                if (this.nonEffectedPredicate(A, p, t-1)) {
                     BoolVar v = this.vmap.getValue("S:" + t + ":" + p);
                     BoolVar v_prev = this.vmap.getValue("S:" + (t-1) + ":" + p);
                     this.model.ifOnlyIf(this.model.and(v), this.model.and(v_prev));
@@ -289,14 +329,14 @@ public class ReasonerSmart extends Reasoner {
 
     private void constraintTransitionNormalState(int A) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
-            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("nop")) {
+            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("(nop)")) {
                 BoolVar n = this.vmap.getValue("H:" + t + ":" + A + ":h");
                 BoolVar[] n_pre = addValidPre(t, A, n);
                 Constraint normalAndPreValid = this.model.and(n_pre);
 
                 String[] eff = this.agentsPlanConditions.get(A).get(t).get(A).get("eff").split("(?=\\() |(?<=\\)) ");
                 int nextVarT = t+1;
-                Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ? this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2)))) : this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1)))).toArray(Constraint[]::new);
+                Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ? this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1)))) : this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s))).toArray(Constraint[]::new);
 
                 Constraint effOccur = this.model.and(effConstraints);
                 this.model.ifThen(normalAndPreValid, effOccur);
@@ -306,7 +346,7 @@ public class ReasonerSmart extends Reasoner {
 
     private void constraintTransitionFaultyState(int A) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
-            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("nop")) {
+            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("(nop)")) {
                 BoolVar f = this.vmap.getValue("H:" + t + ":" + A + ":f");
                 BoolVar[] f_pre = addValidPre(t, A, f);
                 Constraint faultyAndPreValid = this.model.and(f_pre);
@@ -320,9 +360,9 @@ public class ReasonerSmart extends Reasoner {
 
     private void constraintTransitionConflictState(int A) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
-            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("nop")) {
+            if (!this.agentsPlanActions.get(A).get(t).get(A).equals("(nop)")) {
                 Constraint c = this.model.and(this.vmap.getValue("H:" + t + ":" + A + ":c"));
-                String[] pre = this.agentsPlanConditions.get(A).get(t).get(A).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+                String[] pre = this.agentsPlanConditions.get(A).get(t).get(A).get("pre").replaceAll("\\(", "S:" + t + ":(").split("(?=\\() |(?<=\\)) ");
                 Constraint[] all_pre = Stream.concat(Stream.of(this.model.trueConstraint()), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).map(this.model::and).toArray(Constraint[]::new))).toArray(Constraint[]::new);
                 Constraint notAllPreValid = this.model.not(this.model.and(all_pre));
                 this.model.ifOnlyIf(c, notAllPreValid);
@@ -337,21 +377,21 @@ public class ReasonerSmart extends Reasoner {
     private Constraint effNotOccurCons(int t, int A) {
         String[] eff = this.agentsPlanConditions.get(A).get(t).get(A).get("eff").split("(?=\\() |(?<=\\)) ");
         int nextVarT = t + 1;
-        Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ?
+        Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("(not ") ?
                 this.model.and(
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(6, s.length()-2)))),
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(6, s.length()-2)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2))))
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(5, s.length()-1)))),
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(5, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1))))
                 ) :
                 this.model.and(
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(1, s.length()-1)))),
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(1, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1))))
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s))),
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s)))
                 )
         ).toArray(Constraint[]::new);
         return this.model.and(effConstraints);
     }
 
     private BoolVar[] addValidPre(int t, int A, BoolVar v) {
-        String[] pre = this.agentsPlanConditions.get(A).get(t).get(A).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+        String[] pre = this.agentsPlanConditions.get(A).get(t).get(A).get("pre").replaceAll("\\(", "S:" + t + ":(").split("(?=\\() |(?<=\\)) ");
         return Stream.concat(Stream.of(v), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).toArray(BoolVar[]::new))).toArray(BoolVar[]::new);
     }
 
@@ -359,7 +399,7 @@ public class ReasonerSmart extends Reasoner {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
                 if (a != A) {
-                    if (!this.agentsPlanActions.get(A).get(t).get(a).equals("nop")) {
+                    if (!this.agentsPlanActions.get(A).get(t).get(a).equals("(nop)")) {
                         Constraint i = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":i"));
 
                         String[] eff = this.agentsPlanConditions.get(A).get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
@@ -369,9 +409,9 @@ public class ReasonerSmart extends Reasoner {
                         for (int j = 0; j < relevantEff.size(); j++) {
                             String s = relevantEff.get(j);
                             if (s.contains("(not ")) {
-                                effOccur[j+1] = this.model.not(this.model.and(this.vmap.getValue("S:" + (t+1) + ":" + s.substring(6, s.length()-2))));
+                                effOccur[j+1] = this.model.not(this.model.and(this.vmap.getValue("S:" + (t+1) + ":" + s.substring(5, s.length()-1))));
                             } else {
-                                effOccur[j+1] = this.model.and(this.vmap.getValue("S:" + (t+1) + ":" + s.substring(1, s.length()-1)));
+                                effOccur[j+1] = this.model.and(this.vmap.getValue("S:" + (t+1) + ":" + s));
                             }
                         }
 
@@ -386,7 +426,7 @@ public class ReasonerSmart extends Reasoner {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
                 if (a != A) {
-                    if (!this.agentsPlanActions.get(A).get(t).get(a).equals("nop")) {
+                    if (!this.agentsPlanActions.get(A).get(t).get(a).equals("(nop)")) {
                         Constraint g = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":g"));
 
                         String[] eff = this.agentsPlanConditions.get(A).get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
@@ -400,9 +440,9 @@ public class ReasonerSmart extends Reasoner {
                             BoolVar bp;
                             String substring;
                             if (s.contains("(not ")) {
-                                substring = s.substring(6, s.length() - 2);
+                                substring = s.substring(5, s.length() - 1);
                             } else {
-                                substring = s.substring(1, s.length() - 1);
+                                substring = s;
                             }
                             b = this.vmap.getValue("S:" + (t + 1) + ":" + substring);
                             bp = this.vmap.getValue("S:" + t + ":" + substring);
@@ -424,9 +464,7 @@ public class ReasonerSmart extends Reasoner {
         for (String s : eff) {
             String e = s;
             if (e.contains("(not ")) {
-                e = e.substring(6, e.length() - 2);
-            } else {
-                e = e.substring(1, e.length() - 1);
+                e = e.substring(5, e.length() - 1);
             }
             if (this.agentsPredicates.get(A).contains(e)) {
                 rel.add(s);

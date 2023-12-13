@@ -99,6 +99,7 @@ public class ReasonerSimple extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.diagnoses.size();
         this._LOCAL_DIAGNOSES_MAX = this.diagnoses.size();
         this._DIAGNOSES_NUM = this.diagnoses.size();
+        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._SOLV_AND_COMB_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();
@@ -143,7 +144,7 @@ public class ReasonerSimple extends Reasoner {
     private void initializeHealthVariables() {
         for (int t = 0; t < this._COMBINED_PLAN_ACTIONS.size(); t++) {
             for (int a = 0; a < this._COMBINED_PLAN_ACTIONS.get(t).size(); a++) {
-                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
                     this.vmap.put("H:" + t + ":" + a + ":h", this.model.boolVar("x" + this.xi++));
                     this.vmap.put("H:" + t + ":" + a + ":f", this.model.boolVar("x" + this.xi++));
                     this.vmap.put("H:" + t + ":" + a + ":c", this.model.boolVar("x" + this.xi++));
@@ -169,7 +170,7 @@ public class ReasonerSimple extends Reasoner {
     private void constraintTransitionNonEffected() {
         for (int t = 1; t < this._TRAJECTORY.size(); t++) {
             for (String p: this.relevantGroundedPlanPredicates) {
-                if (this.nonEffectedPredicate("(" + p + ")", t-1)) {
+                if (this.nonEffectedPredicate(p, t-1)) {
                     BoolVar v = this.vmap.getValue("S:" + t + ":" + p);
                     BoolVar v_prev = this.vmap.getValue("S:" + (t-1) + ":" + p);
                     this.model.ifOnlyIf(this.model.and(v), this.model.and(v_prev));
@@ -190,14 +191,14 @@ public class ReasonerSimple extends Reasoner {
     private void constraintTransitionNormalState() {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
                     BoolVar n = this.vmap.getValue("H:" + t + ":" + a + ":h");
                     BoolVar[] n_pre = addValidPre(t, a, n);
                     Constraint normalAndPreValid = this.model.and(n_pre);
 
                     String[] eff = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
                     int nextVarT = t+1;
-                    Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ? this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2)))) : this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1)))).toArray(Constraint[]::new);
+                    Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("(not ") ? this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1)))) : this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s))).toArray(Constraint[]::new);
 
                     Constraint effOccur = this.model.and(effConstraints);
                     this.model.ifThen(normalAndPreValid, effOccur);
@@ -209,7 +210,7 @@ public class ReasonerSimple extends Reasoner {
     private void constraintTransitionFaultyState() {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
                     BoolVar f = this.vmap.getValue("H:" + t + ":" + a + ":f");
                     BoolVar[] f_pre = addValidPre(t, a, f);
                     Constraint faultyAndPreValid = this.model.and(f_pre);
@@ -225,9 +226,9 @@ public class ReasonerSimple extends Reasoner {
     private void constraintTransitionConflictState() {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("nop")) {
+                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
                     Constraint c = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":c"));
-                    String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+                    String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":(").split("(?=\\() |(?<=\\)) ");
                     Constraint[] all_pre = Stream.concat(Stream.of(this.model.trueConstraint()), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).map(this.model::and).toArray(Constraint[]::new))).toArray(Constraint[]::new);
                     Constraint notAllPreValid = this.model.not(this.model.and(all_pre));
                     this.model.ifOnlyIf(c, notAllPreValid);
@@ -243,21 +244,21 @@ public class ReasonerSimple extends Reasoner {
     private Constraint effNotOccurCons(int t, int a) {
         String[] eff = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
         int nextVarT = t + 1;
-        Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("not") ?
+        Constraint[] effConstraints = Arrays.stream(eff).map(s -> s.contains("(not ") ?
                 this.model.and(
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(6, s.length()-2)))),
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(6, s.length()-2)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(6, s.length()-2))))
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(5, s.length()-1)))),
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(5, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(5, s.length()-1))))
                 ) :
                 this.model.and(
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(1, s.length()-1)))),
-                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s.substring(1, s.length()-1)))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s.substring(1, s.length()-1))))
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s))), this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s))),
+                        this.model.or(this.model.not(this.model.and(this.vmap.getValue("S:" + (nextVarT-1) + ":" + s))), this.model.and(this.vmap.getValue("S:" + nextVarT + ":" + s)))
                 )
         ).toArray(Constraint[]::new);
         return this.model.and(effConstraints);
     }
 
     private BoolVar[] addValidPre(int t, int a, BoolVar v) {
-        String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":").replaceAll("\\)$", "").split("\\) ");
+        String[] pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").replaceAll("\\(", "S:" + t + ":(").split("(?=\\() |(?<=\\)) ");
         return Stream.concat(Stream.of(v), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).toArray(BoolVar[]::new))).toArray(BoolVar[]::new);
     }
 
