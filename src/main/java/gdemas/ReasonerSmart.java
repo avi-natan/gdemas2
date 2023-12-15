@@ -129,7 +129,7 @@ public class ReasonerSmart extends Reasoner {
 //            print("External/Internal actions rate: " + external / internal);
 
             // model problem
-            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "modelling...");
+//            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "modelling...");
             Instant start = Instant.now();
             this.modelProblem(A);
             Instant end = Instant.now();
@@ -153,7 +153,7 @@ public class ReasonerSmart extends Reasoner {
 //            print(999);
 
             // solve problem
-            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
+//            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
             start = Instant.now();
             this.solveProblem(A);
             end = Instant.now();
@@ -175,12 +175,12 @@ public class ReasonerSmart extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(A).size();
                 this._SOLVING_RUNTIME = runtime;
             }
-            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(A).size() + " diagnoses");
-            print("");
+//            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(A).size() + " diagnoses, Time in MS: " + runtime);
+//            print("");
         }
 
         // combining diagnoses
-        print(java.time.LocalTime.now() + ": " + "combining...");
+//        print(java.time.LocalTime.now() + ": " + "combining...");
         Instant start = Instant.now();
         this.combineDiagnoses();
         Instant end = Instant.now();
@@ -190,9 +190,11 @@ public class ReasonerSmart extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._SOLV_AND_COMB_RUNTIME);
+        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
 
+        // print diagnoses
 //        this.printDiagnoses();
+//        print(34);
     }
 
 //    private double countExternalActions(int A) {

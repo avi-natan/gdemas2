@@ -66,7 +66,7 @@ public class ReasonerSimple extends Reasoner {
         this.vmap = new BijectiveMap<>();
 
         // model problem
-        print(java.time.LocalTime.now() + ": " + "modelling...");
+//        print(java.time.LocalTime.now() + ": " + "modelling...");
         Instant start = Instant.now();
         this.modelProblem();
         Instant end = Instant.now();
@@ -80,7 +80,7 @@ public class ReasonerSimple extends Reasoner {
 //        print(999);
 
         // solve problem
-        print(java.time.LocalTime.now() + ": " + "solving...");
+//        print(java.time.LocalTime.now() + ": " + "solving...");
         start = Instant.now();
         this.solveProblem();
         end = Instant.now();
@@ -103,6 +103,7 @@ public class ReasonerSimple extends Reasoner {
 
         // print diagnoses
 //        this.printDiagnoses();
+//        print(34);
     }
 
     private void modelProblem() {

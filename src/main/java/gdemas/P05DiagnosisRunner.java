@@ -29,7 +29,8 @@ public class P05DiagnosisRunner {
 
         String[] reasoners = {
                 "simple",
-                "smart"
+                "smart",
+                "amazing"
         };
 
         File[] domainFolders = listDirectories(inputFolder);
@@ -124,6 +125,19 @@ public class P05DiagnosisRunner {
                                             while (attempt < maxAttempts) {
                                                 try {
                                                     reasoner = new ReasonerSmart("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner.diagnoseProblem();
+                                                    success = true;
+                                                    break;
+                                                } catch (OutOfMemoryError | Exception e) {
+                                                    e.printStackTrace();
+                                                    attempt += 1;
+                                                }
+                                            }
+                                            break;
+                                        case "amazing":
+                                            while (attempt < maxAttempts) {
+                                                try {
+                                                    reasoner = new ReasonerAmazing("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;

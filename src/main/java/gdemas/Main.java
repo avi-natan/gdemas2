@@ -42,26 +42,26 @@ public class Main {
 
         // Pipeline 05 - diagnosis
         // execution modes: "new", "continue", "continueSkipFailed"
-        String p05executionMode = "continueSkipFailed";
+        String p05executionMode = "new";
         String[] observabilities = {
 //                "1p",
 //                "5p",
-//                "10p",
-//                "12p",
-//                "15p",
-//                "17p",
-//                "20p",
-//                "25p",
-//                "50p",
-//                "75p",
+                "10p",
+                "12p",
+                "15p",
+                "17p",
+                "20p",
+                "25p",
+                "50p",
+                "75p",
                 "99p"
         };
 //        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection
-//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
 
-        manualExecutionWhileWritingAlg();
+//        manualExecutionWhileWritingAlg();
 //        PlanGenerator p = new PlanGenerator();
 //        p.generatePlan();
     }
@@ -70,10 +70,10 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-4-0";
-        int faultsNum = 2;
+        String problemName = "probLOGISTICS-14-0";
+        int faultsNum = 4;
         int repetitionNum = 1;
-        String observability = "99p";
+        String observability = "5p";
 
         // input files based on the parameters
         File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");
@@ -88,6 +88,7 @@ public class Main {
         File resultsFileAmazing = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing-results.txt");
 
         List<Record> records = new ArrayList<>();
+        Record record;
 
         Reasoner simple = new ReasonerSimple(
                 benchmarkName,
@@ -102,7 +103,7 @@ public class Main {
                 observability
         );
         simple.diagnoseProblem();
-        Record record = new Record(simple);
+        record = new Record(simple);
         record.recordToTxtFile(resultsFileSimple);
 
         print(9);

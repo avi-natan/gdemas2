@@ -38,29 +38,40 @@ public class P06ResultsCollector {
                             File resultSmart = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                     "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-smart-results.txt");
+                            File resultAmazing = new File(problemFolder,
+                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing-results.txt");
                             print(resultSimple.getAbsolutePath());
-                            if (resultSimple.exists() && resultSmart.exists()) {
-                                records.add(createSuccessfulRecord(resultSimple, "yes"));
-                                records.add(createSuccessfulRecord(resultSmart, "yes"));
-//                                print("both");
-                                countYes += 2;
-                            } else if (resultSimple.exists() && !resultSmart.exists()) {
-                                records.add(createSuccessfulRecord(resultSimple, "no"));
-                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "smart"));
-//                                print("simple");
-                                countYes += 1;
-                                countNo += 1;
-                            } else if (!resultSimple.exists() && resultSmart.exists()) {
-                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
-                                records.add(createSuccessfulRecord(resultSmart, "no"));
-//                                print("smart");
-                                countNo += 1;
+
+                            String comparable;
+                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing.exists()) {
+                                comparable = "yes";
+                            } else {
+                                comparable = "no";
+                            }
+
+                            if (resultSimple.exists()) {
+                                records.add(createSuccessfulRecord(resultSimple, comparable));
                                 countYes += 1;
                             } else {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
+                                countNo += 1;
+                            }
+
+                            if (resultSmart.exists()) {
+                                records.add(createSuccessfulRecord(resultSmart, comparable));
+                                countYes += 1;
+                            } else {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "smart"));
-//                                print("none");
-                                countNo += 2;
+                                countNo += 1;
+                            }
+
+                            if (resultAmazing.exists()) {
+                                records.add(createSuccessfulRecord(resultAmazing, comparable));
+                                countYes += 1;
+                            } else {
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
+                                countNo += 1;
                             }
 
                         }

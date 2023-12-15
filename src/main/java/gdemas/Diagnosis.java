@@ -7,6 +7,7 @@ import java.util.*;
 
 public class Diagnosis {
     public final List<String> svals;
+    public final List<String> trueHVals;
     public final List<List<String>> actionHealthStates;
     public final String hash;
 
@@ -15,15 +16,19 @@ public class Diagnosis {
         for (BoolVar b: vmap.values()) {
             this.svals.add("(" + vmap.getKey(b) + "=" + s.getIntVal(b) + ")");
         }
+        this.trueHVals = new ArrayList<>();
         this.actionHealthStates = new ArrayList<>();
         for (int t = 0; t < planLength; t++) {
             List<String> stepHealthStates = new ArrayList<>();
             for (int a = 0; a < agentsNum; a++) {
                 if (vmap.containsKey("H:" + t + ":" + a + ":h") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":h")) == 1) {
+                    this.trueHVals.add("H:" + t + ":" + a + ":h");
                     stepHealthStates.add("h");
                 } else if (vmap.containsKey("H:" + t + ":" + a + ":f") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":f")) == 1) {
+                    this.trueHVals.add("H:" + t + ":" + a + ":f");
                     stepHealthStates.add("f");
                 } else if (vmap.containsKey("H:" + t + ":" + a + ":c") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":c")) == 1) {
+                    this.trueHVals.add("H:" + t + ":" + a + ":c");
                     stepHealthStates.add("c");
                 } else if (vmap.containsKey("H:" + t + ":" + a + ":i") && s.getIntVal(vmap.getValue("H:" + t + ":" + a + ":i")) == 1) {
                     stepHealthStates.add("i");
