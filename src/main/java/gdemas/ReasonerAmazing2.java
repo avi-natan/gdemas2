@@ -170,6 +170,9 @@ public class ReasonerAmazing2 extends Reasoner {
                 this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
                 this._MODELLING_RUNTIME = runtime;
             }
+            if (A != 0) {
+                this._TOTAL_RUNTIME += runtime;
+            }
 
 //            print(999);
 
