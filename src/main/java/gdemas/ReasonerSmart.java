@@ -190,7 +190,7 @@ public class ReasonerSmart extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
+        print(java.time.LocalTime.now() + ": Smart - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();

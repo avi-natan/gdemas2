@@ -41,10 +41,13 @@ public class P06ResultsCollector {
                             File resultAmazing = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                             "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing-results.txt");
+                            File resultAmazing2 = new File(problemFolder,
+                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing2-results.txt");
                             print(resultSimple.getAbsolutePath());
 
                             String comparable;
-                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing.exists()) {
+                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing2.exists()) {
                                 comparable = "yes";
                             } else {
                                 comparable = "no";
@@ -70,7 +73,15 @@ public class P06ResultsCollector {
                                 records.add(createSuccessfulRecord(resultAmazing, comparable));
                                 countYes += 1;
                             } else {
-                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "simple"));
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing"));
+                                countNo += 1;
+                            }
+
+                            if (resultAmazing2.exists()) {
+                                records.add(createSuccessfulRecord(resultAmazing2, comparable));
+                                countYes += 1;
+                            } else {
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing2"));
                                 countNo += 1;
                             }
 

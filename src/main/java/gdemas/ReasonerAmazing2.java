@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static gdemas.Utils.print;
 
-public class ReasonerAmazing extends Reasoner {
+public class ReasonerAmazing2 extends Reasoner {
 
     private final List<List<String>>                    agentsPredicates;
     private final List<List<List<String>>>              agentsPlanActions;
@@ -27,18 +27,18 @@ public class ReasonerAmazing extends Reasoner {
     private final List<List<Diagnosis>>                 agentsDiagnoses;
     private List<GlobalDiagnosis>                       globalDiagnoses;
 
-    public ReasonerAmazing(String   benchmarkName,
-                           String   domainName,
-                           String   problemName,
-                           File     domainFile,
-                           File     problemFile,
-                           File     agentsFile,
-                           File     combinedPlanFile,
-                           File     faultsFile,
-                           File     trajectoryFile,
-                           String   observability) {
+    public ReasonerAmazing2(String   benchmarkName,
+                            String   domainName,
+                            String   problemName,
+                            File     domainFile,
+                            File     problemFile,
+                            File     agentsFile,
+                            File     combinedPlanFile,
+                            File     faultsFile,
+                            File     trajectoryFile,
+                            String   observability) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
-        this._REASONER_NAME = "amazing";
+        this._REASONER_NAME = "amazing2";
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
@@ -212,7 +212,7 @@ public class ReasonerAmazing extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": amazing - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
+        print(java.time.LocalTime.now() + ": amazing2 - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();
@@ -270,14 +270,11 @@ public class ReasonerAmazing extends Reasoner {
         // transition of variables in the effects of an internal action in a conflict state
         this.constraintTransitionInternalConflictState(qA);
 
-        // transition of variables in the effects of an external action in a normal state
-        this.constraintTransitionExternalNormalState(qA);
+        // transition of variables in the effects of an external action in a innocent state
+        this.constraintTransitionExternalInnocentState(qA);
 
-        // transition of variables in the effects of an external action in a faulty state
-        this.constraintTransitionExternalFaultyState(qA);
-
-        // transition of variables in the effects of an external action in a conflict state
-        this.constraintTransitionExternalConflictState(qA);
+        // transition of variables in the effects of an external action in a guilty state
+        this.constraintTransitionExternalGuiltyState(qA);
 
         // observation
         this.constraintObservation(qA);
@@ -299,9 +296,14 @@ public class ReasonerAmazing extends Reasoner {
         for (int t = 0; t < this.agentsPlanActions.get(qA).size(); t++) {
             for (int a = 0; a < this.agentsPlanActions.get(qA).get(t).size(); a++) {
                 if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
-                    this.vmap.put("H:" + t + ":" + a + ":h", this.model.boolVar("x" + this.xi++));
-                    this.vmap.put("H:" + t + ":" + a + ":f", this.model.boolVar("x" + this.xi++));
-                    this.vmap.put("H:" + t + ":" + a + ":c", this.model.boolVar("x" + this.xi++));
+                    if (a == qA) {
+                        this.vmap.put("H:" + t + ":" + a + ":h", this.model.boolVar("x" + this.xi++));
+                        this.vmap.put("H:" + t + ":" + a + ":f", this.model.boolVar("x" + this.xi++));
+                        this.vmap.put("H:" + t + ":" + a + ":c", this.model.boolVar("x" + this.xi++));
+                    } else {
+                        this.vmap.put("H:" + t + ":" + a + ":i", this.model.boolVar("x" + this.xi++));
+                        this.vmap.put("H:" + t + ":" + a + ":g", this.model.boolVar("x" + this.xi++));
+                    }
                 }
             }
         }
@@ -310,12 +312,21 @@ public class ReasonerAmazing extends Reasoner {
     private void constraintHealthStatesMutualExclusive(int qA) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
-                    BoolVar h = this.vmap.getValue("H:" + t + ":" + a + ":h");
-                    BoolVar f = this.vmap.getValue("H:" + t + ":" + a + ":f");
-                    BoolVar c = this.vmap.getValue("H:" + t + ":" + a + ":c");
-                    BoolVar[] vars = {h, f, c};
-                    this.model.sum(vars, "=", 1).post();
+                if (a == qA) {
+                    if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
+                        BoolVar h = this.vmap.getValue("H:" + t + ":" + a + ":h");
+                        BoolVar f = this.vmap.getValue("H:" + t + ":" + a + ":f");
+                        BoolVar c = this.vmap.getValue("H:" + t + ":" + a + ":c");
+                        BoolVar[] vars = {h, f, c};
+                        this.model.sum(vars, "=", 1).post();
+                    }
+                } else {
+                    if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
+                        BoolVar i = this.vmap.getValue("H:" + t + ":" + a + ":i");
+                        BoolVar g = this.vmap.getValue("H:" + t + ":" + a + ":g");
+                        BoolVar[] vars = {i, g};
+                        this.model.sum(vars, "=", 1).post();
+                    }
                 }
             }
         }
@@ -410,12 +421,12 @@ public class ReasonerAmazing extends Reasoner {
         return Stream.concat(Stream.of(v), Arrays.stream(Arrays.stream(pre).map(this.vmap::getValue).toArray(BoolVar[]::new))).toArray(BoolVar[]::new);
     }
 
-    private void constraintTransitionExternalNormalState(int qA) {
+    private void constraintTransitionExternalInnocentState(int qA) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
                 if (a != qA) {
                     if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
-                        Constraint n = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":h"));
+                        Constraint i = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":i"));
 
                         String[] eff = this.agentsPlanConditions.get(qA).get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
                         List<String> relevantEff = computeRelevantEffects(qA, eff);
@@ -430,19 +441,19 @@ public class ReasonerAmazing extends Reasoner {
                             }
                         }
 
-                        this.model.ifThen(n, this.model.and(effOccur));
+                        this.model.ifThen(i, this.model.and(effOccur));
                     }
                 }
             }
         }
     }
 
-    private void constraintTransitionExternalFaultyState(int qA) {
+    private void constraintTransitionExternalGuiltyState(int qA) {
         for (int t = 0; t < this._PLAN_LENGTH; t++) {
             for (int a = 0; a < this._AGENTS_NUM; a++) {
                 if (a != qA) {
                     if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
-                        Constraint f = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":f"));
+                        Constraint g = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":g"));
 
                         String[] eff = this.agentsPlanConditions.get(qA).get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
                         List<String> relevantEff = computeRelevantEffects(qA, eff);
@@ -467,44 +478,7 @@ public class ReasonerAmazing extends Reasoner {
                             );
                         }
 
-                        this.model.ifThen(f, this.model.and(effNotOccur));
-                    }
-                }
-            }
-        }
-    }
-
-    private void constraintTransitionExternalConflictState(int qA) {
-        for (int t = 0; t < this._PLAN_LENGTH; t++) {
-            for (int a = 0; a < this._AGENTS_NUM; a++) {
-                if (a != qA) {
-                    if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)")) {
-                        Constraint c = this.model.and(this.vmap.getValue("H:" + t + ":" + a + ":c"));
-
-                        String[] eff = this.agentsPlanConditions.get(qA).get(t).get(a).get("eff").split("(?=\\() |(?<=\\)) ");
-                        List<String> relevantEff = computeRelevantEffects(qA, eff);
-
-                        Constraint[] effNotOccur = new Constraint[relevantEff.size()+1];
-                        effNotOccur[0] = this.model.trueConstraint();
-                        for (int j = 0; j < relevantEff.size(); j++) {
-                            String s = relevantEff.get(j);
-                            BoolVar b;
-                            BoolVar bp;
-                            String substring;
-                            if (s.contains("(not ")) {
-                                substring = s.substring(5, s.length() - 1);
-                            } else {
-                                substring = s;
-                            }
-                            b = this.vmap.getValue("S:" + (t + 1) + ":" + substring);
-                            bp = this.vmap.getValue("S:" + t + ":" + substring);
-                            effNotOccur[j+1] = this.model.and(
-                                    this.model.or(this.model.not(this.model.and(b)), this.model.and(bp)),
-                                    this.model.or(this.model.not(this.model.and(bp)), this.model.and(b))
-                            );
-                        }
-
-                        this.model.ifThen(c, this.model.and(effNotOccur));
+                        this.model.ifThen(g, this.model.and(effNotOccur));
                     }
                 }
             }
@@ -541,28 +515,58 @@ public class ReasonerAmazing extends Reasoner {
         int qAi = this.queue.indexOf(qA);
         if (qAi != 0) {
             int prevQA = this.queue.get(qAi-1);
-//            Constraint[] diagnosesOrConstraints = new Constraint[this.agentsDiagnoses.get(prevQA).size()];
-            List<Constraint> diagnosesOrConstraints = new ArrayList<>();
-            for (int d = 0; d < this.agentsDiagnoses.get(prevQA).size(); d++) {
-                List<String> relevantHealthStates = new ArrayList<>();
-                for (int h = 0; h < this.agentsDiagnoses.get(prevQA).get(d).trueHVals.size(); h++) {
-                    String hsString = this.agentsDiagnoses.get(prevQA).get(d).trueHVals.get(h);
-                    if (this.vmap.containsKey(hsString)) {
-                        relevantHealthStates.add(hsString);
+
+            List<PairG> relevantActions = new ArrayList<>();
+            for (int t = 0; t < this._PLAN_LENGTH; t++) {
+                for (int a = 0; a < this._AGENTS_NUM; a++) {
+                    if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)") && !this.agentsPlanActions.get(prevQA).get(t).get(a).equals("(nop)")) {
+                        relevantActions.add(new PairG(t,a));
                     }
                 }
+            }
 
-                if (!relevantHealthStates.isEmpty()) {
-                    Constraint[] relevantHealthAndConstraints = new Constraint[relevantHealthStates.size()];
-                    for (int h = 0; h < relevantHealthStates.size(); h++) {
-                        relevantHealthAndConstraints[h] = this.model.and(this.vmap.getValue(relevantHealthStates.get(h)));
+            if (!relevantActions.isEmpty()) {
+                List<Constraint> diagnosesOrConstraints = new ArrayList<>();
+                for (int d = 0; d < this.agentsDiagnoses.get(prevQA).size(); d++) {
+                    Constraint[] relevantHealthAndConstraints = new Constraint[relevantActions.size()];
+                    for (int h = 0; h < relevantActions.size(); h++) {
+                        PairG p = relevantActions.get(h);
+                        int pT = p.getNum1();
+                        int pA = p.getNum2();
+                        String pqaAHS = this.agentsDiagnoses.get(prevQA).get(d).actionHealthStates.get(pT).get(pA);
+                        if (pA == qA) {
+                            if (pqaAHS.equals("i")) {
+                                BoolVar bh = this.vmap.getValue("H:" + pT + ":" + pA + ":h");
+                                relevantHealthAndConstraints[h] = this.model.and(bh);
+                            } else {
+                                BoolVar bf = this.vmap.getValue("H:" + pT + ":" + pA + ":f");
+                                BoolVar bc = this.vmap.getValue("H:" + pT + ":" + pA + ":c");
+                                relevantHealthAndConstraints[h] = this.model.or(bf, bc);
+                            }
+                        } else if (pA == prevQA) {
+                            BoolVar b;
+                            if (pqaAHS.equals("h")) {
+                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":i");
+                            } else {
+                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":g");
+                            }
+                            relevantHealthAndConstraints[h] = this.model.and(b);
+                        } else {
+                            BoolVar b;
+                            if (pqaAHS.equals("i")) {
+                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":i");
+                            } else {
+                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":g");
+                            }
+                            relevantHealthAndConstraints[h] = this.model.and(b);
+                        }
                     }
                     diagnosesOrConstraints.add(this.model.and(relevantHealthAndConstraints));
                 }
-            }
-            if (!diagnosesOrConstraints.isEmpty()) {
-                Constraint[] diagnosesOrConstraintsArray = diagnosesOrConstraints.toArray(new Constraint[0]);
-                this.model.or(diagnosesOrConstraintsArray).post();
+                if (!diagnosesOrConstraints.isEmpty()) {
+                    Constraint[] diagnosesOrConstraintsArray = diagnosesOrConstraints.toArray(new Constraint[0]);
+                    this.model.or(diagnosesOrConstraintsArray).post();
+                }
             }
         }
     }
@@ -654,28 +658,54 @@ public class ReasonerAmazing extends Reasoner {
                         nds = "x";
                         break;
 
+                    case "xi":
+                    case "ix":
+                    case "ii":
+                        nds = "i";
+                        break;
+
+                    case "xg":
+                    case "gx":
+                    case "gg":
+                        nds = "g";
+                        break;
+
                     case "xh":
+                    case "ih":
                     case "hx":
+                    case "hi":
                     case "hh":
                         nds = "h";
                         break;
 
                     case "xf":
+                    case "gf":
                     case "fx":
+                    case "fg":
                     case "ff":
                         nds = "f";
                         break;
 
                     case "xc":
+                    case "gc":
                     case "cx":
+                    case "cg":
                     case "cc":
                         nds = "c";
                         break;
 
+                    case "ig":
+                    case "if":
+                    case "ic":
+                    case "gi":
+                    case "gh":
+                    case "hg":
                     case "hf":
                     case "hc":
+                    case "fi":
                     case "fh":
                     case "fc":
+                    case "ci":
                     case "ch":
                     case "cf":
                     default:
