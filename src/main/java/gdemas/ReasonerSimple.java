@@ -10,7 +10,6 @@ import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static gdemas.Utils.*;
@@ -94,12 +93,12 @@ public class ReasonerSimple extends Reasoner {
 
         // combine diagnoses
         this._COMBINING_RUNTIME = 0;
-        this._SOLV_AND_COMB_RUNTIME = this._SOLVING_RUNTIME;
+        this._TOTAL_RUNTIME = this._SOLVING_RUNTIME;
         this._LOCAL_DIAGNOSES_NUMBERS = "[" + this.diagnoses.size() + "]";
         this._LOCAL_DIAGNOSES_MIN = this.diagnoses.size();
         this._LOCAL_DIAGNOSES_MAX = this.diagnoses.size();
         this._DIAGNOSES_NUM = this.diagnoses.size();
-        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._SOLV_AND_COMB_RUNTIME);
+        print(java.time.LocalTime.now() + ": success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._TOTAL_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();

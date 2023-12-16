@@ -38,7 +38,7 @@ public class Record {
             "# S Diagnoses number",
             "# S Runtime",
             "# Combining runtime",
-            "# Solv & Comb runtime",
+            "# Total runtime",
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
@@ -77,7 +77,7 @@ public class Record {
     public int                              _SOLVING_DIAGNOSES_NUM;
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
-    public long                             _SOLV_AND_COMB_RUNTIME;
+    public long                             _TOTAL_RUNTIME;
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
@@ -116,7 +116,7 @@ public class Record {
         this._SOLVING_DIAGNOSES_NUM     = r.getSolvingDiagnosesNum();
         this._SOLVING_RUNTIME           = r.getSolvingRuntime();
         this._COMBINING_RUNTIME         = r.getCombiningRuntime();
-        this._SOLV_AND_COMB_RUNTIME     = r.getSolvAndCombRuntime();
+        this._TOTAL_RUNTIME             = r.getTotalRuntime();
         this._LOCAL_DIAGNOSES_NUMBERS   = r.getLocalDiagnosesNumbers();
         this._LOCAL_DIAGNOSES_MIN       = r.getLocalDiagnosesMin();
         this._LOCAL_DIAGNOSES_MAX       = r.getLocalDiagnosesMax();
@@ -155,7 +155,7 @@ public class Record {
         row.createCell(c++).setCellValue(this._SOLVING_DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
-        row.createCell(c++).setCellValue(this._SOLV_AND_COMB_RUNTIME);
+        row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
@@ -194,7 +194,7 @@ public class Record {
                 "# S Diagnoses number:" + this._SOLVING_DIAGNOSES_NUM + "\n" +
                 "# S Runtime:" + this._SOLVING_RUNTIME + "\n" +
                 "# Combining runtime:" + this._COMBINING_RUNTIME + "\n" +
-                "# Solv & Comb runtime:" + this._SOLV_AND_COMB_RUNTIME + "\n" +
+                "# Total runtime:" + this._TOTAL_RUNTIME + "\n" +
                 "Local diagnoses numbers:" + this._LOCAL_DIAGNOSES_NUMBERS + "\n" +
                 "# Local diagnoses min:" + this._LOCAL_DIAGNOSES_MIN + "\n" +
                 "# Local diagnoses max:" + this._LOCAL_DIAGNOSES_MAX + "\n" +

@@ -47,7 +47,7 @@ public abstract class Reasoner {
     public int                              _SOLVING_DIAGNOSES_NUM;
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
-    public long                             _SOLV_AND_COMB_RUNTIME;
+    public long                             _TOTAL_RUNTIME;
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
@@ -105,7 +105,7 @@ public abstract class Reasoner {
         this._SOLVING_DIAGNOSES_NUM     = 0;
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
-        this._SOLV_AND_COMB_RUNTIME     = 0;
+        this._TOTAL_RUNTIME             = 0;
         this._LOCAL_DIAGNOSES_NUMBERS   = "";
         this._LOCAL_DIAGNOSES_MIN       = 0;
         this._LOCAL_DIAGNOSES_MAX       = 0;
@@ -293,8 +293,8 @@ public abstract class Reasoner {
     public long getCombiningRuntime() {
         return _COMBINING_RUNTIME;
     }
-    public long getSolvAndCombRuntime() {
-        return _SOLV_AND_COMB_RUNTIME;
+    public long getTotalRuntime() {
+        return _TOTAL_RUNTIME;
     }
     public String getLocalDiagnosesNumbers () {
         return this._LOCAL_DIAGNOSES_NUMBERS;

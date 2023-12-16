@@ -196,7 +196,7 @@ public class ReasonerAmazing2 extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
                 this._SOLVING_RUNTIME = runtime;
             }
-            this._SOLV_AND_COMB_RUNTIME += runtime;
+            this._TOTAL_RUNTIME += runtime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + runtime);
 //            print("");
         }
@@ -207,12 +207,12 @@ public class ReasonerAmazing2 extends Reasoner {
         this.combineDiagnoses();
         Instant end = Instant.now();
         this._COMBINING_RUNTIME = Duration.between(start, end).toMillis();
-        this._SOLV_AND_COMB_RUNTIME += this._COMBINING_RUNTIME;
+        this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
         this._LOCAL_DIAGNOSES_NUMBERS = this.agentsDiagnoses.stream().map(List::size).collect(Collectors.toList()).toString();
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": amazing2 - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._SOLV_AND_COMB_RUNTIME);
+        print(java.time.LocalTime.now() + ": amazing2 - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();

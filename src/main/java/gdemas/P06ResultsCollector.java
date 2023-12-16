@@ -135,7 +135,7 @@ public class P06ResultsCollector {
         rec._SOLVING_DIAGNOSES_NUM     = resultStrings[c++].split(":")[1];
         rec._SOLVING_RUNTIME           = resultStrings[c++].split(":")[1];
         rec._COMBINING_RUNTIME         = resultStrings[c++].split(":")[1];
-        rec._SOLV_AND_COMB_RUNTIME     = resultStrings[c++].split(":")[1];
+        rec._TOTAL_RUNTIME             = resultStrings[c++].split(":")[1];
         rec._LOCAL_DIAGNOSES_NUMBERS   = resultStrings[c++].split(":")[1];
         rec._LOCAL_DIAGNOSES_MIN       = resultStrings[c++].split(":")[1];
         rec._LOCAL_DIAGNOSES_MAX       = resultStrings[c++].split(":")[1];
@@ -180,7 +180,7 @@ public class P06ResultsCollector {
         rec._SOLVING_DIAGNOSES_NUM     = "-";
         rec._SOLVING_RUNTIME           = "-";
         rec._COMBINING_RUNTIME         = "-";
-        rec._SOLV_AND_COMB_RUNTIME     = "-";
+        rec._TOTAL_RUNTIME             = "-";
         rec._LOCAL_DIAGNOSES_NUMBERS   = "-";
         rec._LOCAL_DIAGNOSES_MIN       = "-";
         rec._LOCAL_DIAGNOSES_MAX       = "-";

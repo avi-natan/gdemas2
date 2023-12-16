@@ -45,23 +45,23 @@ public class Main {
         String p05executionMode = "new";
         String[] observabilities = {
 //                "1p",
-                "5p",
-                "10p",
-                "12p",
-                "15p",
-                "17p",
-                "20p",
+//                "5p",
+//                "10p",
+//                "12p",
+//                "15p",
+//                "17p",
+//                "20p",
                 "25p",
                 "50p",
                 "75p",
                 "99p"
         };
-//        P05DiagnosisRunner.execute(p05executionMode, observabilities);
+        P05DiagnosisRunner.execute(p05executionMode, observabilities);
 
         // pipeline 06 - results collection
-//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
 
-        manualExecutionWhileWritingAlg();
+//        manualExecutionWhileWritingAlg();
 //        PlanGenerator p = new PlanGenerator();
 //        p.generatePlan();
     }

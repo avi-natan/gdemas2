@@ -34,7 +34,7 @@ public class Record2 {
             "# S Diagnoses number",
             "# S Runtime",
             "# Combining runtime",
-            "# Solv & Comb runtime",
+            "# Total runtime",
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
@@ -75,7 +75,7 @@ public class Record2 {
     public String                           _SOLVING_DIAGNOSES_NUM;         // int
     public String                           _SOLVING_RUNTIME;               // long
     public String                           _COMBINING_RUNTIME;             // long
-    public String                           _SOLV_AND_COMB_RUNTIME;         // long
+    public String                           _TOTAL_RUNTIME;                 // long
     public String                           _LOCAL_DIAGNOSES_NUMBERS;       // String
     public String                           _LOCAL_DIAGNOSES_MIN;           // int
     public String                           _LOCAL_DIAGNOSES_MAX;           // int
@@ -123,7 +123,7 @@ public class Record2 {
         row.createCell(c++).setCellValue(this._SOLVING_DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
-        row.createCell(c++).setCellValue(this._SOLV_AND_COMB_RUNTIME);
+        row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
@@ -164,7 +164,7 @@ public class Record2 {
         row.createCell(c++).setCellValue(Integer.parseInt(this._SOLVING_DIAGNOSES_NUM));
         row.createCell(c++).setCellValue(Long.parseLong(this._SOLVING_RUNTIME));
         row.createCell(c++).setCellValue(Long.parseLong(this._COMBINING_RUNTIME));
-        row.createCell(c++).setCellValue(Long.parseLong(this._SOLV_AND_COMB_RUNTIME));
+        row.createCell(c++).setCellValue(Long.parseLong(this._TOTAL_RUNTIME));
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MIN));
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MAX));
