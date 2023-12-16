@@ -44,10 +44,13 @@ public class P06ResultsCollector {
                             File resultAmazing2 = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                             "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing2-results.txt");
+                            File resultAmazing3 = new File(problemFolder,
+                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing3-results.txt");
                             print(resultSimple.getAbsolutePath());
 
                             String comparable;
-                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing2.exists()) {
+                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing2.exists() && resultAmazing3.exists()) {
                                 comparable = "yes";
                             } else {
                                 comparable = "no";
@@ -82,6 +85,14 @@ public class P06ResultsCollector {
                                 countYes += 1;
                             } else {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing2"));
+                                countNo += 1;
+                            }
+
+                            if (resultAmazing3.exists()) {
+                                records.add(createSuccessfulRecord(resultAmazing3, comparable));
+                                countYes += 1;
+                            } else {
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing3"));
                                 countNo += 1;
                             }
 

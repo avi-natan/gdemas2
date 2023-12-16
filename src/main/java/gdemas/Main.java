@@ -46,14 +46,14 @@ public class Main {
         String[] observabilities = {
 //                "1p",
 //                "5p",
-//                "10p",
+                "10p",
 //                "12p",
-//                "15p",
+                "15p",
 //                "17p",
-//                "20p",
-                "25p",
+                "20p",
+//                "25p",
                 "50p",
-                "75p",
+//                "75p",
                 "99p"
         };
         P05DiagnosisRunner.execute(p05executionMode, observabilities);
@@ -70,10 +70,10 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-4-0";
+        String problemName = "probLOGISTICS-14-0";
         int faultsNum = 2;
         int repetitionNum = 1;
-        String observability = "99p";
+        String observability = "1p";
 
         // input files based on the parameters
         File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");
@@ -87,6 +87,7 @@ public class Main {
         File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
         File resultsFileAmazing = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing-results.txt");
         File resultsFileAmazing2 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing2-results.txt");
+        File resultsFileAmazing3 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing3-results.txt");
 
         List<Record> records = new ArrayList<>();
         Record record;
@@ -157,6 +158,23 @@ public class Main {
         amazing2.diagnoseProblem();
         record = new Record(amazing2);
         record.recordToTxtFile(resultsFileAmazing2);
+
+        print(9);
+        Reasoner amazing3 = new ReasonerAmazing3(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability
+        );
+        amazing3.diagnoseProblem();
+        record = new Record(amazing3);
+        record.recordToTxtFile(resultsFileAmazing3);
 
         print(777);
     }

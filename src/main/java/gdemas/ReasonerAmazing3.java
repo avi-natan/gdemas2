@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static gdemas.Utils.print;
 
-public class ReasonerAmazing2 extends Reasoner {
+public class ReasonerAmazing3 extends Reasoner {
 
     private final List<List<String>>                    agentsPredicates;
     private final List<List<List<String>>>              agentsPlanActions;
@@ -27,7 +27,7 @@ public class ReasonerAmazing2 extends Reasoner {
     private final List<List<Diagnosis>>                 agentsDiagnoses;
     private List<GlobalDiagnosis>                       globalDiagnoses;
 
-    public ReasonerAmazing2(String   benchmarkName,
+    public ReasonerAmazing3(String   benchmarkName,
                             String   domainName,
                             String   problemName,
                             File     domainFile,
@@ -38,7 +38,7 @@ public class ReasonerAmazing2 extends Reasoner {
                             File     trajectoryFile,
                             String   observability) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
-        this._REASONER_NAME = "amazing2";
+        this._REASONER_NAME = "amazing3";
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
@@ -150,9 +150,13 @@ public class ReasonerAmazing2 extends Reasoner {
 //            print("External/Internal actions rate: " + external / internal);
 
             // model problem
-//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling...");
+            // offline part
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling offline part...");
+            this.modelProblemOfflinePart(qA);
+            // online part + measuring
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling online part...");
             Instant start = Instant.now();
-            this.modelProblem(qA);
+            this.modelProblemOnlinePart(qA);
             Instant end = Instant.now();
             long runtime = Duration.between(start, end).toMillis();
             if (A == 0) {
@@ -216,7 +220,7 @@ public class ReasonerAmazing2 extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
         this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": amazing2 - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME);
+        print(java.time.LocalTime.now() + ": amazing3 - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME);
 
         // print diagnoses
 //        this.printDiagnoses();
@@ -251,7 +255,7 @@ public class ReasonerAmazing2 extends Reasoner {
 //        return count;
 //    }
 
-    private void modelProblem(int qA) {
+    private void modelProblemOfflinePart(int qA) {
         // initialize state variables
         this.initializeStateVariables(qA);
 
@@ -282,7 +286,9 @@ public class ReasonerAmazing2 extends Reasoner {
 
         // observation
         this.constraintObservation(qA);
+    }
 
+    private void modelProblemOnlinePart(int qA) {
         // possibleHealthStates
         this.constraintPossibleHealthStates(qA);
     }
