@@ -115,10 +115,10 @@ public class ReasonerAmazing2 extends Reasoner {
             pairs.add(new Pair(a, this.countActionsNumber(this.agentsPlanActions.get(a))));
         }
 
-        pairs.sort(Comparator.comparing(Pair::getLocalDiagnosesNum));
+        pairs.sort(Comparator.comparing(Pair::getNum2));
 
         for (Pair p : pairs) {
-            queue.add(p.getAgentNum());
+            queue.add(p.getNum1());
         }
 
         return queue;
@@ -516,11 +516,11 @@ public class ReasonerAmazing2 extends Reasoner {
         if (qAi != 0) {
             int prevQA = this.queue.get(qAi-1);
 
-            List<PairG> relevantActions = new ArrayList<>();
+            List<Pair> relevantActions = new ArrayList<>();
             for (int t = 0; t < this._PLAN_LENGTH; t++) {
                 for (int a = 0; a < this._AGENTS_NUM; a++) {
                     if (!this.agentsPlanActions.get(qA).get(t).get(a).equals("(nop)") && !this.agentsPlanActions.get(prevQA).get(t).get(a).equals("(nop)")) {
-                        relevantActions.add(new PairG(t,a));
+                        relevantActions.add(new Pair(t,a));
                     }
                 }
             }
@@ -530,7 +530,7 @@ public class ReasonerAmazing2 extends Reasoner {
                 for (int d = 0; d < this.agentsDiagnoses.get(prevQA).size(); d++) {
                     Constraint[] relevantHealthAndConstraints = new Constraint[relevantActions.size()];
                     for (int h = 0; h < relevantActions.size(); h++) {
-                        PairG p = relevantActions.get(h);
+                        Pair p = relevantActions.get(h);
                         int pT = p.getNum1();
                         int pA = p.getNum2();
                         String pqaAHS = this.agentsDiagnoses.get(prevQA).get(d).actionHealthStates.get(pT).get(pA);
@@ -624,10 +624,10 @@ public class ReasonerAmazing2 extends Reasoner {
             pairs.add(new Pair(a, agentsDiagnoses.get(a).size()));
         }
 
-        pairs.sort(Comparator.comparing(Pair::getLocalDiagnosesNum));
+        pairs.sort(Comparator.comparing(Pair::getNum2));
 
         for (Pair p : pairs) {
-            sortedByLocalDiagnosesNum.add(p.getAgentNum());
+            sortedByLocalDiagnosesNum.add(p.getNum1());
         }
 
         return sortedByLocalDiagnosesNum;

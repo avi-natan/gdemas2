@@ -61,7 +61,7 @@ public class Main {
         // pipeline 06 - results collection
 //        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
 
-//        manualExecutionWhileWritingAlg();
+        manualExecutionWhileWritingAlg();
 //        PlanGenerator p = new PlanGenerator();
 //        p.generatePlan();
     }

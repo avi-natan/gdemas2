@@ -115,10 +115,10 @@ public class ReasonerAmazing extends Reasoner {
             pairs.add(new Pair(a, this.countActionsNumber(this.agentsPlanActions.get(a))));
         }
 
-        pairs.sort(Comparator.comparing(Pair::getLocalDiagnosesNum));
+        pairs.sort(Comparator.comparing(Pair::getNum2));
 
         for (Pair p : pairs) {
-            queue.add(p.getAgentNum());
+            queue.add(p.getNum1());
         }
 
         return queue;
@@ -620,10 +620,10 @@ public class ReasonerAmazing extends Reasoner {
             pairs.add(new Pair(a, agentsDiagnoses.get(a).size()));
         }
 
-        pairs.sort(Comparator.comparing(Pair::getLocalDiagnosesNum));
+        pairs.sort(Comparator.comparing(Pair::getNum2));
 
         for (Pair p : pairs) {
-            sortedByLocalDiagnosesNum.add(p.getAgentNum());
+            sortedByLocalDiagnosesNum.add(p.getNum1());
         }
 
         return sortedByLocalDiagnosesNum;

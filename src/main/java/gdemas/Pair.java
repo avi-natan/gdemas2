@@ -1,19 +1,24 @@
 package gdemas;
 
 public class Pair {
-    private final int agentNum;
-    private final int localDiagnosesNum;
+    private final int num1;
+    private final int num2;
 
-    public Pair(int agentNum, int localDiagnosesNum) {
-        this.agentNum = agentNum;
-        this.localDiagnosesNum = localDiagnosesNum;
+    public Pair(int num1, int num2) {
+        this.num1 = num1;
+        this.num2 = num2;
     }
 
-    public int getAgentNum() {
-        return agentNum;
+    public int getNum1() {
+        return num1;
     }
 
-    public int getLocalDiagnosesNum() {
-        return localDiagnosesNum;
+    public int getNum2() {
+        return num2;
+    }
+
+    @Override
+    public String toString() {
+        return this.num1 + ", " + this.num2;
     }
 }
