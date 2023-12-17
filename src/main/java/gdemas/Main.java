@@ -1,21 +1,15 @@
 package gdemas;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.BoolVar;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import static gdemas.Utils.print;
-import static gdemas.Utils.listDirectories;
 
 public class Main {
     public static void main(String[] args) {
@@ -64,6 +58,27 @@ public class Main {
         manualExecutionWhileWritingAlg();
 //        PlanGenerator p = new PlanGenerator();
 //        p.generatePlan();
+
+//        chocoLibraryTest();
+    }
+
+    private static void chocoLibraryTest() {
+        Model model = new Model();
+        BoolVar h = model.boolVar("x1");
+        BoolVar f = model.boolVar("x2");
+        BoolVar c = model.boolVar("x3");
+        BoolVar[] vars = {h,f,c};
+        model.sum(vars, "=", 1).post();
+
+        Solver solver = model.getSolver();
+        Solution s = solver.findSolution();
+        while (s != null) {
+            print("h: " + s.getIntVal(h));
+            print("h: " + s.getIntVal(f));
+            print("c: " + s.getIntVal(c));
+            print("");
+            s = solver.findSolution();
+        }
     }
 
     private static void manualExecutionWhileWritingAlg() {

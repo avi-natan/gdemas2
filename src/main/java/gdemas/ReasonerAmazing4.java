@@ -607,6 +607,14 @@ public class ReasonerAmazing4 extends Reasoner {
             }
             s = solver.findSolution();
         }
+        // try this after the cluster starts working again
+//        while (model.getSolver().solve()){
+//            Solution s = new Solution(model).record();
+//            Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
+//            if (!this.containsDiagnosis(this.agentsDiagnoses.get(qA), d)) {
+//                this.agentsDiagnoses.get(qA).add(d);
+//            }
+//        }
     }
 
     private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {
