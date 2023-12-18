@@ -47,10 +47,16 @@ public class P06ResultsCollector {
                             File resultAmazing3 = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                             "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing3-results.txt");
-                            print(resultSimple.getAbsolutePath());
+                            File resultAmazing4 = new File(problemFolder,
+                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing4-results.txt");
+                            File resultAmazing5 = new File(problemFolder,
+                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing5-results.txt");
+                            print(resultSmart.getAbsolutePath());
 
                             String comparable;
-                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing2.exists() && resultAmazing3.exists()) {
+                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing.exists() && resultAmazing2.exists() && resultAmazing3.exists() && resultAmazing4.exists() && resultAmazing5.exists()) {
                                 comparable = "yes";
                             } else {
                                 comparable = "no";
@@ -93,6 +99,22 @@ public class P06ResultsCollector {
                                 countYes += 1;
                             } else {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing3"));
+                                countNo += 1;
+                            }
+
+                            if (resultAmazing4.exists()) {
+                                records.add(createSuccessfulRecord(resultAmazing4, comparable));
+                                countYes += 1;
+                            } else {
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing4"));
+                                countNo += 1;
+                            }
+
+                            if (resultAmazing5.exists()) {
+                                records.add(createSuccessfulRecord(resultAmazing5, comparable));
+                                countYes += 1;
+                            } else {
+                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing5"));
                                 countNo += 1;
                             }
 
@@ -229,34 +251,5 @@ public class P06ResultsCollector {
             throw new RuntimeException(e);
         }
         print(9);
-    }
-
-    private static void saveRecords(List<Record> records, File resultsFile) {
-        try {
-            // open a workbook
-            FileOutputStream file = new FileOutputStream(resultsFile);
-            Workbook wb = new HSSFWorkbook();
-            // adding a sheet
-            Sheet resultsSheet = wb.createSheet("results");
-
-            // writing the column names
-            Row headersRow = resultsSheet.createRow(0);
-            for (int i = 0; i < Record.headers.length; i++) {
-                headersRow.createCell(i).setCellValue(Record.headers[i]);
-            }
-
-            // writing the data
-            for (int j = 0; j < records.size(); j++) {
-                Row row = resultsSheet.createRow(j+1);
-                records.get(j).recordToRow(row);
-            }
-
-            // closing workbook
-            wb.close();
-            // save the workbook
-            wb.write(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

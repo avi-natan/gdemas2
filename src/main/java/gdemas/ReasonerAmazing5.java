@@ -20,8 +20,9 @@ public class ReasonerAmazing5 extends Reasoner {
     private final List<List<String>>                    agentsPredicates;
     private final List<List<List<String>>>              agentsPlanActions;
     private final List<List<List<Map<String, String>>>> agentsPlanConditions;
-    private final List<List<List<Pair>>>                agentsRelevantActions;
-    private final List<Integer>                         queue;
+    private final List<List<RelevantAction>>            relevantActions;
+    private final PriorityQueue<RelevantAgent>          queue;
+    private RelevantAgent                               currentAgent;
     private Model                                       model;
     private long                                        xi;
     private BijectiveMap<String, BoolVar>               vmap;
@@ -43,8 +44,8 @@ public class ReasonerAmazing5 extends Reasoner {
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
-        this.agentsRelevantActions = this.computeAgentsRelevantActions();
-        this.queue = this.arrangeAgentsInQueue();
+        this.relevantActions = this.computeRelevantActions();
+        this.queue = this.computeRelevantAgentsActionsQueue();
         this.agentsDiagnoses = new ArrayList<>();
         for (int a = 0; a < this._AGENTS_NUM; a++) {
             this.agentsDiagnoses.add(new ArrayList<>());
@@ -109,40 +110,35 @@ public class ReasonerAmazing5 extends Reasoner {
         return agentsPlanConditions;
     }
 
-    private List<List<List<Pair>>> computeAgentsRelevantActions() {
-        List<List<List<Pair>>> agentsRelevantActions = new ArrayList<>();
-        for (int A = 0; A < this._AGENTS_NUM; A++) {
-            List<List<Pair>> ARelevantActions = new ArrayList<>();
+    private List<List<RelevantAction>> computeRelevantActions() {
+        List<List<RelevantAction>> relevantActions = new ArrayList<>();
+        for (int t = 0; t < this._PLAN_LENGTH; t++) {
+            List<RelevantAction> stepRelevantActions = new ArrayList<>();
             for (int a = 0; a < this._AGENTS_NUM; a++) {
-                List<Pair> aARelevantActions = new ArrayList<>();
-                if (a != A) {
-                    for (int t = 0; t < this._PLAN_LENGTH; t++) {
-                        for (int aa = 0; aa < this._AGENTS_NUM; aa++) {
-                            if (!this.agentsPlanActions.get(A).get(t).get(aa).equals("(nop)") && !this.agentsPlanActions.get(a).get(t).get(aa).equals("(nop)")) {
-                                aARelevantActions.add(new Pair(t,aa));
-                            }
-                        }
-                    }
+                if (this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
+                    stepRelevantActions.add(null);
+                } else {
+                    stepRelevantActions.add(new RelevantAction(t, a));
                 }
-                ARelevantActions.add(aARelevantActions);
             }
-            agentsRelevantActions.add(ARelevantActions);
+            relevantActions.add(stepRelevantActions);
         }
-        return agentsRelevantActions;
+        return relevantActions;
     }
 
-    private List<Integer> arrangeAgentsInQueue() {
-        List<Integer> queue = new ArrayList<>();
+    private PriorityQueue<RelevantAgent> computeRelevantAgentsActionsQueue() {
+        PriorityQueue<RelevantAgent> queue = new PriorityQueue<>(Comparator.comparing(RelevantAgent::getPossibleDiagnosesNum));
 
-        List<Pair> pairs = new ArrayList<>();
-        for (int a = 0; a < this.agentsPlanActions.size(); a++) {
-            pairs.add(new Pair(a, this.countActionsNumber(this.agentsPlanActions.get(a))));
-        }
-
-        pairs.sort(Comparator.comparing(Pair::getNum2));
-
-        for (Pair p : pairs) {
-            queue.add(p.getNum1());
+        for (int A = 0; A < this._AGENTS_NUM; A++) {
+            RelevantAgent ra = new RelevantAgent(A);
+            for (int t = 0; t < this._PLAN_LENGTH; t++) {
+                for (int a = 0; a < this._AGENTS_NUM; a++) {
+                    if (!this.agentsPlanActions.get(A).get(t).get(a).equals("(nop)")) {
+                        ra.insertRelevantAction(this.relevantActions.get(t).get(a));
+                    }
+                }
+            }
+            queue.add(ra);
         }
 
         return queue;
@@ -150,9 +146,13 @@ public class ReasonerAmazing5 extends Reasoner {
 
     @Override
     public void diagnoseProblem() {
-        for (int A = 0; A < this.queue.size(); A++) {
-            // get the agent according to the index
-            int qA = this.queue.get(A);
+        int A = -1;
+        while (!this.queue.isEmpty()) {
+            // get the agent from the priority queue
+            this.currentAgent = this.queue.poll();
+            int qA = this.currentAgent.getQA();
+            A += 1;
+
 
             // create the model
             this.model = new Model();
@@ -546,58 +546,31 @@ public class ReasonerAmazing5 extends Reasoner {
     }
 
     private void constraintPossibleHealthStates(int qA) {
-        int qAi = this.queue.indexOf(qA);
-        if (qAi != 0) {
-            int prevQA = this.queue.get(qAi-1);
-            List<Pair> relevantActions = this.agentsRelevantActions.get(qA).get(prevQA);
-
-            if (!relevantActions.isEmpty()) {
-                List<Constraint> diagnosesOrConstraints = new ArrayList<>();
-                for (int d = 0; d < this.agentsDiagnoses.get(prevQA).size(); d++) {
-                    Constraint[] relevantHealthAndConstraints = new Constraint[relevantActions.size()];
-                    for (int h = 0; h < relevantActions.size(); h++) {
-                        Pair p = relevantActions.get(h);
-                        int pT = p.getNum1();
-                        int pA = p.getNum2();
-                        String pqaAHS = this.agentsDiagnoses.get(prevQA).get(d).actionHealthStates.get(pT).get(pA);
-                        if (pA == qA) {
-                            if (pqaAHS.equals("i")) {
-                                BoolVar bh = this.vmap.getValue("H:" + pT + ":" + pA + ":h");
-                                relevantHealthAndConstraints[h] = this.model.and(bh);
-                            } else {
-                                BoolVar bf = this.vmap.getValue("H:" + pT + ":" + pA + ":f");
-                                BoolVar bc = this.vmap.getValue("H:" + pT + ":" + pA + ":c");
-                                relevantHealthAndConstraints[h] = this.model.or(bf, bc);
-                            }
-                        } else if (pA == prevQA) {
-                            BoolVar b;
-                            if (pqaAHS.equals("h")) {
-                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":i");
-                            } else {
-                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":g");
-                            }
-                            relevantHealthAndConstraints[h] = this.model.and(b);
-                        } else {
-                            BoolVar b;
-                            if (pqaAHS.equals("i")) {
-                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":i");
-                            } else {
-                                b = this.vmap.getValue("H:" + pT + ":" + pA + ":g");
-                            }
-                            relevantHealthAndConstraints[h] = this.model.and(b);
-                        }
+        for (RelevantAction ra : this.currentAgent.getRelevantActions()) {
+            List<String> possibleValues = ra.getPossibleValues();
+            int t = ra.getActionT();
+            int a = ra.getActionA();
+            BoolVar[] possibleHealthValues = new BoolVar[possibleValues.size()];
+            for (int v = 0; v < possibleValues.size(); v++) {
+                if (a == qA) {
+                    possibleHealthValues[v] = vmap.getValue("H:" + t + ":" + a + ":" + possibleValues.get(v));
+                } else {
+                    if (possibleValues.get(v).equals("h")) {
+                        possibleHealthValues[v] = vmap.getValue("H:" + t + ":" + a + ":i");
+                    } else {
+                        possibleHealthValues[v] = vmap.getValue("H:" + t + ":" + a + ":g");
                     }
-                    diagnosesOrConstraints.add(this.model.and(relevantHealthAndConstraints));
-                }
-                if (!diagnosesOrConstraints.isEmpty()) {
-                    Constraint[] diagnosesOrConstraintsArray = diagnosesOrConstraints.toArray(new Constraint[0]);
-                    this.model.or(diagnosesOrConstraintsArray).post();
                 }
             }
+            this.model.or(possibleHealthValues).post();
         }
     }
 
     private void solveProblem(int qA) {
+        List<List<String>> updatedRelevantActionsHealthStates = new ArrayList<>();
+        for (RelevantAction ra : this.currentAgent.getRelevantActions()) {
+            updatedRelevantActionsHealthStates.add(new ArrayList<>());
+        }
         Solver solver = this.model.getSolver();
         Solution s = solver.findSolution();
         while (s != null) {
@@ -605,7 +578,11 @@ public class ReasonerAmazing5 extends Reasoner {
             if (!this.containsDiagnosis(this.agentsDiagnoses.get(qA), d)) {
                 this.agentsDiagnoses.get(qA).add(d);
             }
+            this.updateRelevantActionsHealthStates(updatedRelevantActionsHealthStates, d);
             s = solver.findSolution();
+        }
+        for (int u = 0; u < updatedRelevantActionsHealthStates.size(); u++) {
+            this.currentAgent.getRelevantActions().get(u).setPossibleValues(updatedRelevantActionsHealthStates.get(u));
         }
         // try this after the cluster starts working again
 //        while (model.getSolver().solve()){
@@ -615,6 +592,45 @@ public class ReasonerAmazing5 extends Reasoner {
 //                this.agentsDiagnoses.get(qA).add(d);
 //            }
 //        }
+    }
+
+    private void updateRelevantActionsHealthStates(List<List<String>> updatedRelevantActionsHealthStates, Diagnosis d) {
+        int nextAction = 0;
+        for (int t = 0; t < this._PLAN_LENGTH; t++) {
+            for (int a = 0; a < this._AGENTS_NUM; a++) {
+                if (!d.actionHealthStates.get(t).get(a).equals("x")) {
+                    switch (d.actionHealthStates.get(t).get(a)) {
+                        case "h":
+                        case "i":
+                            if (!updatedRelevantActionsHealthStates.get(nextAction).contains("h")) {
+                                updatedRelevantActionsHealthStates.get(nextAction).add("h");
+                            }
+                            break;
+                        case "f":
+                            if (!updatedRelevantActionsHealthStates.get(nextAction).contains("f")) {
+                                updatedRelevantActionsHealthStates.get(nextAction).add("f");
+                            }
+                            break;
+                        case "c":
+                            if (!updatedRelevantActionsHealthStates.get(nextAction).contains("c")) {
+                                updatedRelevantActionsHealthStates.get(nextAction).add("c");
+                            }
+                            break;
+                        case "g":
+                            if (!updatedRelevantActionsHealthStates.get(nextAction).contains("f")) {
+                                updatedRelevantActionsHealthStates.get(nextAction).add("f");
+                            }
+                            if (!updatedRelevantActionsHealthStates.get(nextAction).contains("c")) {
+                                updatedRelevantActionsHealthStates.get(nextAction).add("c");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    nextAction += 1;
+                }
+            }
+        }
     }
 
     private boolean containsDiagnosis(List<Diagnosis> diagnoses, Diagnosis nd) {

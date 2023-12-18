@@ -32,7 +32,9 @@ public class P05DiagnosisRunner {
                 "smart",
                 "amazing",
                 "amazing2",
-                "amazing3"
+                "amazing3",
+                "amazing4",
+                "amazing5"
         };
 
         File[] domainFolders = listDirectories(inputFolder);
@@ -166,6 +168,32 @@ public class P05DiagnosisRunner {
                                             while (attempt < maxAttempts) {
                                                 try {
                                                     reasoner = new ReasonerAmazing3("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner.diagnoseProblem();
+                                                    success = true;
+                                                    break;
+                                                } catch (OutOfMemoryError | Exception e) {
+                                                    e.printStackTrace();
+                                                    attempt += 1;
+                                                }
+                                            }
+                                            break;
+                                        case "amazing4":
+                                            while (attempt < maxAttempts) {
+                                                try {
+                                                    reasoner = new ReasonerAmazing4("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner.diagnoseProblem();
+                                                    success = true;
+                                                    break;
+                                                } catch (OutOfMemoryError | Exception e) {
+                                                    e.printStackTrace();
+                                                    attempt += 1;
+                                                }
+                                            }
+                                            break;
+                                        case "amazing5":
+                                            while (attempt < maxAttempts) {
+                                                try {
+                                                    reasoner = new ReasonerAmazing5("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;
