@@ -48,6 +48,15 @@ public abstract class Reasoner {
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _TOTAL_RUNTIME;
+    public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_INTERNAL_ACTIONS_MIN;
+    public int                              _LOCAL_INTERNAL_ACTIONS_MAX;
+    public String                           _LOCAL_EXTERNAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_EXTERNAL_ACTIONS_MIN;
+    public int                              _LOCAL_EXTERNAL_ACTIONS_MAX;
+    public String                           _LOCAL_TOTAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_TOTAL_ACTIONS_MIN;
+    public int                              _LOCAL_TOTAL_ACTIONS_MAX;
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
@@ -106,6 +115,15 @@ public abstract class Reasoner {
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
         this._TOTAL_RUNTIME             = 0;
+        this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "";
+        this._LOCAL_INTERNAL_ACTIONS_MIN       = 0;
+        this._LOCAL_INTERNAL_ACTIONS_MAX       = 0;
+        this._LOCAL_EXTERNAL_ACTIONS_NUMBERS   = "";
+        this._LOCAL_EXTERNAL_ACTIONS_MIN       = 0;
+        this._LOCAL_EXTERNAL_ACTIONS_MAX       = 0;
+        this._LOCAL_TOTAL_ACTIONS_NUMBERS   = "";
+        this._LOCAL_TOTAL_ACTIONS_MIN       = 0;
+        this._LOCAL_TOTAL_ACTIONS_MAX       = 0;
         this._LOCAL_DIAGNOSES_NUMBERS   = "";
         this._LOCAL_DIAGNOSES_MIN       = 0;
         this._LOCAL_DIAGNOSES_MAX       = 0;
@@ -295,6 +313,33 @@ public abstract class Reasoner {
     }
     public long getTotalRuntime() {
         return _TOTAL_RUNTIME;
+    }
+    public String getLocalInternalActionsNumbers() {
+        return _LOCAL_INTERNAL_ACTIONS_NUMBERS;
+    }
+    public int getLocalInternalActionsMin() {
+        return _LOCAL_INTERNAL_ACTIONS_MIN;
+    }
+    public int getLocalInternalActionsMax() {
+        return _LOCAL_INTERNAL_ACTIONS_MAX;
+    }
+    public String getLocalExternalActionsNumbers() {
+        return _LOCAL_EXTERNAL_ACTIONS_NUMBERS;
+    }
+    public int getLocalExternalActionsMin() {
+        return _LOCAL_EXTERNAL_ACTIONS_MIN;
+    }
+    public int getLocalExternalActionsMax() {
+        return _LOCAL_EXTERNAL_ACTIONS_MAX;
+    }
+    public String getLocalTotalActionsNumbers() {
+        return _LOCAL_TOTAL_ACTIONS_NUMBERS;
+    }
+    public int getLocalTotalActionsMin() {
+        return _LOCAL_TOTAL_ACTIONS_MIN;
+    }
+    public int getLocalTotalActionsMax() {
+        return _LOCAL_TOTAL_ACTIONS_MAX;
     }
     public String getLocalDiagnosesNumbers () {
         return this._LOCAL_DIAGNOSES_NUMBERS;

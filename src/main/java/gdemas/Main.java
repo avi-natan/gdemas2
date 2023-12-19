@@ -85,10 +85,10 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-14-0";
+        String problemName = "probLOGISTICS-4-0";
         int faultsNum = 2;
         int repetitionNum = 1;
-        String observability = "1p";
+        String observability = "99p";
 
         // input files based on the parameters
         File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");

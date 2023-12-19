@@ -39,6 +39,15 @@ public class Record {
             "# S Runtime",
             "# Combining runtime",
             "# Total runtime",
+            "Local internal actions numbers",
+            "# Local internal actions min",
+            "# Local internal actions max",
+            "Local external actions numbers",
+            "# Local external actions min",
+            "# Local external actions max",
+            "Local total actions numbers",
+            "# Local total actions min",
+            "# Local total actions max",
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
@@ -78,6 +87,15 @@ public class Record {
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _TOTAL_RUNTIME;
+    public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_INTERNAL_ACTIONS_MIN;
+    public int                              _LOCAL_INTERNAL_ACTIONS_MAX;
+    public String                           _LOCAL_EXTERNAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_EXTERNAL_ACTIONS_MIN;
+    public int                              _LOCAL_EXTERNAL_ACTIONS_MAX;
+    public String                           _LOCAL_TOTAL_ACTIONS_NUMBERS;
+    public int                              _LOCAL_TOTAL_ACTIONS_MIN;
+    public int                              _LOCAL_TOTAL_ACTIONS_MAX;
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
@@ -117,6 +135,15 @@ public class Record {
         this._SOLVING_RUNTIME           = r.getSolvingRuntime();
         this._COMBINING_RUNTIME         = r.getCombiningRuntime();
         this._TOTAL_RUNTIME             = r.getTotalRuntime();
+        this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = r.getLocalInternalActionsNumbers();
+        this._LOCAL_INTERNAL_ACTIONS_MIN       = r.getLocalInternalActionsMin();
+        this._LOCAL_INTERNAL_ACTIONS_MAX       = r.getLocalInternalActionsMax();
+        this._LOCAL_EXTERNAL_ACTIONS_NUMBERS   = r.getLocalExternalActionsNumbers();
+        this._LOCAL_EXTERNAL_ACTIONS_MIN       = r.getLocalExternalActionsMin();
+        this._LOCAL_EXTERNAL_ACTIONS_MAX       = r.getLocalExternalActionsMax();
+        this._LOCAL_TOTAL_ACTIONS_NUMBERS   = r.getLocalTotalActionsNumbers();
+        this._LOCAL_TOTAL_ACTIONS_MIN       = r.getLocalTotalActionsMin();
+        this._LOCAL_TOTAL_ACTIONS_MAX       = r.getLocalTotalActionsMax();
         this._LOCAL_DIAGNOSES_NUMBERS   = r.getLocalDiagnosesNumbers();
         this._LOCAL_DIAGNOSES_MIN       = r.getLocalDiagnosesMin();
         this._LOCAL_DIAGNOSES_MAX       = r.getLocalDiagnosesMax();
@@ -155,6 +182,15 @@ public class Record {
         row.createCell(c++).setCellValue(this._SOLVING_DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MAX);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_MAX);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MAX);
         row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
@@ -195,6 +231,15 @@ public class Record {
                 "# S Runtime:" + this._SOLVING_RUNTIME + "\n" +
                 "# Combining runtime:" + this._COMBINING_RUNTIME + "\n" +
                 "# Total runtime:" + this._TOTAL_RUNTIME + "\n" +
+                "Local internal actions numbers:" + this._LOCAL_INTERNAL_ACTIONS_NUMBERS + "\n" +
+                "# Local internal actions min:" + this._LOCAL_INTERNAL_ACTIONS_MIN + "\n" +
+                "# Local internal actions max:" + this._LOCAL_INTERNAL_ACTIONS_MAX + "\n" +
+                "Local external actions numbers:" + this._LOCAL_EXTERNAL_ACTIONS_NUMBERS + "\n" +
+                "# Local external actions min:" + this._LOCAL_EXTERNAL_ACTIONS_MIN + "\n" +
+                "# Local external actions max:" + this._LOCAL_EXTERNAL_ACTIONS_MAX + "\n" +
+                "Local total actions numbers:" + this._LOCAL_TOTAL_ACTIONS_NUMBERS + "\n" +
+                "# Local total actions min:" + this._LOCAL_TOTAL_ACTIONS_MIN + "\n" +
+                "# Local total actions max:" + this._LOCAL_TOTAL_ACTIONS_MAX + "\n" +
                 "Local diagnoses numbers:" + this._LOCAL_DIAGNOSES_NUMBERS + "\n" +
                 "# Local diagnoses min:" + this._LOCAL_DIAGNOSES_MIN + "\n" +
                 "# Local diagnoses max:" + this._LOCAL_DIAGNOSES_MAX + "\n" +

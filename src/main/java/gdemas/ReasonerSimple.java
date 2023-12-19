@@ -35,6 +35,15 @@ public class ReasonerSimple extends Reasoner {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
         this._REASONER_NAME = "simple";
         this.relevantGroundedPlanPredicates = this.computeRelevantGroundedPlanPredicates();
+        this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "[" + this.countActions() + "]";
+        this._LOCAL_INTERNAL_ACTIONS_MIN       = this.countActions();
+        this._LOCAL_INTERNAL_ACTIONS_MAX       = this.countActions();
+        this._LOCAL_EXTERNAL_ACTIONS_NUMBERS   = "[" + this.countActions() + "]";
+        this._LOCAL_EXTERNAL_ACTIONS_MIN       = this.countActions();
+        this._LOCAL_EXTERNAL_ACTIONS_MAX       = this.countActions();
+        this._LOCAL_TOTAL_ACTIONS_NUMBERS   = "[" + this.countActions() + "]";
+        this._LOCAL_TOTAL_ACTIONS_MIN       = this.countActions();
+        this._LOCAL_TOTAL_ACTIONS_MAX       = this.countActions();
         this.diagnoses = new ArrayList<>();
     }
 
@@ -51,6 +60,18 @@ public class ReasonerSimple extends Reasoner {
             }
         }
         return rgppreds;
+    }
+
+    private int countActions() {
+        int count = 0;
+        for (List<String> planAction : this._COMBINED_PLAN_ACTIONS) {
+            for (String a : planAction) {
+                if (!a.equals("(nop)")) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
     }
 
     @Override

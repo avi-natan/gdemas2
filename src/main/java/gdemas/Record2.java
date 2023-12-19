@@ -35,6 +35,15 @@ public class Record2 {
             "# S Runtime",
             "# Combining runtime",
             "# Total runtime",
+            "Local internal actions numbers",
+            "# Local internal actions min",
+            "# Local internal actions max",
+            "Local external actions numbers",
+            "# Local external actions min",
+            "# Local external actions max",
+            "Local total actions numbers",
+            "# Local total actions min",
+            "# Local total actions max",
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
@@ -76,6 +85,15 @@ public class Record2 {
     public String                           _SOLVING_RUNTIME;               // long
     public String                           _COMBINING_RUNTIME;             // long
     public String                           _TOTAL_RUNTIME;                 // long
+    public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;// String
+    public String                           _LOCAL_INTERNAL_ACTIONS_MIN;    // int
+    public String                           _LOCAL_INTERNAL_ACTIONS_MAX;    // int
+    public String                           _LOCAL_EXTERNAL_ACTIONS_NUMBERS;// String
+    public String                           _LOCAL_EXTERNAL_ACTIONS_MIN;    // int
+    public String                           _LOCAL_EXTERNAL_ACTIONS_MAX;    // int
+    public String                           _LOCAL_TOTAL_ACTIONS_NUMBERS;   // String
+    public String                           _LOCAL_TOTAL_ACTIONS_MIN;       // int
+    public String                           _LOCAL_TOTAL_ACTIONS_MAX;       // int
     public String                           _LOCAL_DIAGNOSES_NUMBERS;       // String
     public String                           _LOCAL_DIAGNOSES_MIN;           // int
     public String                           _LOCAL_DIAGNOSES_MAX;           // int
@@ -124,6 +142,15 @@ public class Record2 {
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
         row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MAX);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_MAX);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MIN);
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MAX);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
@@ -165,6 +192,15 @@ public class Record2 {
         row.createCell(c++).setCellValue(Long.parseLong(this._SOLVING_RUNTIME));
         row.createCell(c++).setCellValue(Long.parseLong(this._COMBINING_RUNTIME));
         row.createCell(c++).setCellValue(Long.parseLong(this._TOTAL_RUNTIME));
+        row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_INTERNAL_ACTIONS_MIN));
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_INTERNAL_ACTIONS_MAX));
+        row.createCell(c++).setCellValue(this._LOCAL_EXTERNAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_EXTERNAL_ACTIONS_MIN));
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_EXTERNAL_ACTIONS_MAX));
+        row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_NUMBERS);
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_TOTAL_ACTIONS_MIN));
+        row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_TOTAL_ACTIONS_MAX));
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MIN));
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MAX));

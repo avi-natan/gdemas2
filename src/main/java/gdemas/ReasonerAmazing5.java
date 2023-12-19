@@ -46,6 +46,18 @@ public class ReasonerAmazing5 extends Reasoner {
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
         this.relevantActions = this.computeRelevantActions();
         this.queue = this.computeRelevantAgentsActionsQueue();
+        List<Integer> agentsInternalActionsNumbers = this.countInternalActions();
+        List<Integer> agentsExternalActionsNumbers = this.countExternalActions();
+        List<Integer> agentsTotalActionsNumbers = this.countTotalActions();
+        this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = new ArrayList<>(agentsInternalActionsNumbers).toString();
+        this._LOCAL_INTERNAL_ACTIONS_MIN       = agentsInternalActionsNumbers.stream().mapToInt(Integer::intValue).min().orElseThrow(NoSuchElementException::new);
+        this._LOCAL_INTERNAL_ACTIONS_MAX       = agentsInternalActionsNumbers.stream().mapToInt(Integer::intValue).max().orElseThrow(NoSuchElementException::new);
+        this._LOCAL_EXTERNAL_ACTIONS_NUMBERS   = new ArrayList<>(agentsExternalActionsNumbers).toString();
+        this._LOCAL_EXTERNAL_ACTIONS_MIN       = agentsExternalActionsNumbers.stream().mapToInt(Integer::intValue).min().orElseThrow(NoSuchElementException::new);
+        this._LOCAL_EXTERNAL_ACTIONS_MAX       = agentsExternalActionsNumbers.stream().mapToInt(Integer::intValue).max().orElseThrow(NoSuchElementException::new);
+        this._LOCAL_TOTAL_ACTIONS_NUMBERS   = new ArrayList<>(agentsTotalActionsNumbers).toString();
+        this._LOCAL_TOTAL_ACTIONS_MIN       = agentsTotalActionsNumbers.stream().mapToInt(Integer::intValue).min().orElseThrow(NoSuchElementException::new);
+        this._LOCAL_TOTAL_ACTIONS_MAX       = agentsTotalActionsNumbers.stream().mapToInt(Integer::intValue).max().orElseThrow(NoSuchElementException::new);
         this.agentsDiagnoses = new ArrayList<>();
         for (int a = 0; a < this._AGENTS_NUM; a++) {
             this.agentsDiagnoses.add(new ArrayList<>());
@@ -142,6 +154,70 @@ public class ReasonerAmazing5 extends Reasoner {
         }
 
         return queue;
+    }
+
+    private List<Integer> countInternalActions() {
+        List<Integer> agentsInternalActionsNumbers = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            agentsInternalActionsNumbers.add(this.countInternalActions(a));
+        }
+        return agentsInternalActionsNumbers;
+    }
+
+    private int countInternalActions(int A) {
+        int count = 0;
+        for (List<String> planAction : this.agentsPlanActions.get(A)) {
+            for (int a = 0; a < planAction.size(); a++) {
+                if (a==A) {
+                    if (!planAction.get(a).equals("(nop)")) {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    private List<Integer> countExternalActions() {
+        List<Integer> agentsInternalActionsNumbers = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            agentsInternalActionsNumbers.add(this.countExternalActions(a));
+        }
+        return agentsInternalActionsNumbers;
+    }
+
+    private int countExternalActions(int A) {
+        int count = 0;
+        for (List<String> planAction : this.agentsPlanActions.get(A)) {
+            for (int a = 0; a < planAction.size(); a++) {
+                if (a!=A) {
+                    if (!planAction.get(a).equals("(nop)")) {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    private List<Integer> countTotalActions() {
+        List<Integer> agentsInternalActionsNumbers = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            agentsInternalActionsNumbers.add(this.countTotalActions(a));
+        }
+        return agentsInternalActionsNumbers;
+    }
+
+    private int countTotalActions(int A) {
+        int count = 0;
+        for (List<String> planAction : this.agentsPlanActions.get(A)) {
+            for (int a = 0; a < planAction.size(); a++) {
+                if (!planAction.get(a).equals("(nop)")) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
     }
 
     @Override
@@ -250,34 +326,6 @@ public class ReasonerAmazing5 extends Reasoner {
 //        this.printDiagnoses();
 //        print(34);
     }
-
-//    private double countExternalActions(int qA) {
-//        int count = 0;
-//        for (List<String> planAction : this.agentsPlanActions.get(qA)) {
-//            for (int a = 0; a < planAction.size(); a++) {
-//                if (a!=qA) {
-//                    if (!planAction.get(a).equals("(nop)")) {
-//                        count += 1;
-//                    }
-//                }
-//            }
-//        }
-//        return count;
-//    }
-//
-//    private double countInternalActions(int qA) {
-//        int count = 0;
-//        for (List<String> planAction : this.agentsPlanActions.get(qA)) {
-//            for (int a = 0; a < planAction.size(); a++) {
-//                if (a==qA) {
-//                    if (!planAction.get(a).equals("(nop)")) {
-//                        count += 1;
-//                    }
-//                }
-//            }
-//        }
-//        return count;
-//    }
 
     private void modelProblemOfflinePart(int qA) {
         // initialize state variables
