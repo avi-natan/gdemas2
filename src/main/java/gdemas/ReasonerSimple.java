@@ -101,7 +101,7 @@ public class ReasonerSimple extends Reasoner {
 //        print(999);
 
         // solve problem (metrics are recorded within the problem-solving function)
-        this.solveProblem(this._TIMEOUT);
+        this.solveProblem();
 
         // combine diagnoses
         this._COMBINING_RUNTIME = 0;
@@ -286,16 +286,24 @@ public class ReasonerSimple extends Reasoner {
         }
     }
 
-    private void solveProblem(long timeout) {
+    private void solveProblem() {
         Solver solver = this.model.getSolver();
 
-        solver.limitTime(timeout);
-        long cumulativeRuntimeMS;
+        solver.limitTime(this._TIMEOUT);
+//        int searchCount = 1;
+//        long cumulativeRuntimeMSPrev;
+        long cumulativeRuntimeMS = 0;
+//        long runtimeMS;
         boolean isStopMet;
 
+//        searchCount += 1;
+//        print(java.time.LocalTime.now() + ": " + "before " + searchCount);
         Solution s = solver.findSolution();
+//        cumulativeRuntimeMSPrev = cumulativeRuntimeMS;
         cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+//        runtimeMS = cumulativeRuntimeMS - cumulativeRuntimeMSPrev;
         isStopMet = solver.isStopCriterionMet();
+//        print(java.time.LocalTime.now() + ": " + "after " + searchCount + ", runtime in MS: " + runtimeMS + ", cumulative runtime in MS: " + cumulativeRuntimeMS + ". Stop criterion met: " + isStopMet);
 
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
@@ -303,9 +311,14 @@ public class ReasonerSimple extends Reasoner {
                 this.diagnoses.add(d);
             }
 
+//            searchCount += 1;
+//            print(java.time.LocalTime.now() + ": " + "before " + searchCount);
             s = solver.findSolution();
+//            cumulativeRuntimeMSPrev = cumulativeRuntimeMS;
             cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+//            runtimeMS = cumulativeRuntimeMS - cumulativeRuntimeMSPrev;
             isStopMet = solver.isStopCriterionMet();
+//            print(java.time.LocalTime.now() + ": " + "after " + searchCount  + ", runtime in MS: " + runtimeMS + ", cumulative runtime in MS: " + cumulativeRuntimeMS + ". Stop criterion met: " + isStopMet);
         }
 
         this._SOLVING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
@@ -317,8 +330,6 @@ public class ReasonerSimple extends Reasoner {
         this._SOLVING_RUNTIME = cumulativeRuntimeMS;
         if (isStopMet) {
             this._TIMEDOUT = 1;
-        } else {
-            this._TIMEDOUT = 0;
         }
     }
 

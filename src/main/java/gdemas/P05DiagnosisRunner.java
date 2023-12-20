@@ -30,7 +30,7 @@ public class P05DiagnosisRunner {
         String[] reasoners = {
                 "simple",
                 "smart",
-                "amazing5"
+//                "amazing5"
         };
 
         File[] domainFolders = listDirectories(inputFolder);

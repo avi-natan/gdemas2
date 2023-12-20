@@ -119,7 +119,7 @@ public abstract class Reasoner {
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
         this._TOTAL_RUNTIME             = 0;
-        this._TIMEDOUT                  = -1;
+        this._TIMEDOUT                  = 0;
         this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "";
         this._LOCAL_INTERNAL_ACTIONS_MIN       = 0;
         this._LOCAL_INTERNAL_ACTIONS_MAX       = 0;

@@ -50,13 +50,13 @@ public class Main {
 //                "75p",
 //                "99p"
         };
-        long timeout = 1000;
+        long timeout = 2000;
         P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
 
         // pipeline 06 - results collection
         P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
 
-//        manualExecutionWhileWritingAlg();
+        manualExecutionWhileWritingAlg();
 
 //        chocoLibraryTest();
     }
@@ -84,7 +84,7 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-13-0";
+        String problemName = "probLOGISTICS-4-0";
         int faultsNum = 2;
         int repetitionNum = 1;
         String observability = "1p";
@@ -99,7 +99,7 @@ public class Main {
         File trajectoryFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-combined_trajectory.trajectory");
 
         File resultsFileSimple = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-simple-results.txt");
-//        File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
+        File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
 //        File resultsFileAmazing5 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing5-results.txt");
 
         List<Record> records = new ArrayList<>();
@@ -122,22 +122,23 @@ public class Main {
         record = new Record(simple);
         record.recordToTxtFile(resultsFileSimple);
 
-//        print(9);
-//        Reasoner smart = new ReasonerSmart(
-//                benchmarkName,
-//                domainName,
-//                problemName,
-//                domainFile,
-//                problemFile,
-//                agentsFile,
-//                combinedPlanFile,
-//                faultsFile,
-//                trajectoryFile,
-//                observability
-//        );
-//        smart.diagnoseProblem();
-//        record = new Record(smart);
-//        record.recordToTxtFile(resultsFileSmart);
+        print(9);
+        Reasoner smart = new ReasonerSmart(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability,
+                timeout
+        );
+        smart.diagnoseProblem();
+        record = new Record(smart);
+        record.recordToTxtFile(resultsFileSmart);
 
 //        print(9);
 //        Reasoner amazing5 = new ReasonerAmazing5(

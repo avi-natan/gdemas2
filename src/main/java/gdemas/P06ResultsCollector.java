@@ -38,13 +38,13 @@ public class P06ResultsCollector {
                             File resultSmart = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                     "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-smart-results.txt");
-                            File resultAmazing5 = new File(problemFolder,
-                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
-                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing5-results.txt");
+//                            File resultAmazing5 = new File(problemFolder,
+//                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
+//                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing5-results.txt");
                             print(resultSimple.getAbsolutePath());
 
                             String comparable;
-                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing5.exists()) {
+                            if (resultSimple.exists() && resultSmart.exists()) {
                                 comparable = "yes";
                             } else {
                                 comparable = "no";
@@ -66,13 +66,13 @@ public class P06ResultsCollector {
                                 countNo += 1;
                             }
 
-                            if (resultAmazing5.exists()) {
-                                records.add(createSuccessfulRecord(resultAmazing5, comparable));
-                                countYes += 1;
-                            } else {
-                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing5"));
-                                countNo += 1;
-                            }
+//                            if (resultAmazing5.exists()) {
+//                                records.add(createSuccessfulRecord(resultAmazing5, comparable));
+//                                countYes += 1;
+//                            } else {
+//                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing5"));
+//                                countNo += 1;
+//                            }
 
                         }
                     }
