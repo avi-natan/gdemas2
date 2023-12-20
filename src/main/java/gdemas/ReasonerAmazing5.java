@@ -38,8 +38,9 @@ public class ReasonerAmazing5 extends Reasoner {
                             File     combinedPlanFile,
                             File     faultsFile,
                             File     trajectoryFile,
-                            String   observability) {
-        super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
+                            String   observability,
+                            long     timeout) {
+        super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability, timeout);
         this._REASONER_NAME = "amazing5";
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();

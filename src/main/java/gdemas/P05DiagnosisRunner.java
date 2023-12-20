@@ -8,7 +8,7 @@ import static gdemas.Utils.listDirectories;
 
 public class P05DiagnosisRunner {
 
-    public static void execute(String executionMode, String[] observabilities) {
+    public static void execute(String executionMode, String[] observabilities, long timeout) {
         File inputFolder = new File("benchmarks/mastrips/05 - faulty executions");
         File outputFolder = new File("benchmarks/mastrips/06 - results");
 
@@ -30,10 +30,6 @@ public class P05DiagnosisRunner {
         String[] reasoners = {
                 "simple",
                 "smart",
-//                "amazing",
-//                "amazing2",
-//                "amazing3",
-//                "amazing4",
                 "amazing5"
         };
 
@@ -115,7 +111,7 @@ public class P05DiagnosisRunner {
                                         case "simple":
                                             while (attempt < maxAttempts) {
                                                 try {
-                                                    reasoner = new ReasonerSimple("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner = new ReasonerSimple("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability, timeout);
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;
@@ -128,7 +124,7 @@ public class P05DiagnosisRunner {
                                         case "smart":
                                             while (attempt < maxAttempts) {
                                                 try {
-                                                    reasoner = new ReasonerSmart("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner = new ReasonerSmart("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability, timeout);
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;
@@ -138,62 +134,10 @@ public class P05DiagnosisRunner {
                                                 }
                                             }
                                             break;
-//                                        case "amazing":
-//                                            while (attempt < maxAttempts) {
-//                                                try {
-//                                                    reasoner = new ReasonerAmazing("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
-//                                                    reasoner.diagnoseProblem();
-//                                                    success = true;
-//                                                    break;
-//                                                } catch (OutOfMemoryError | Exception e) {
-//                                                    e.printStackTrace();
-//                                                    attempt += 1;
-//                                                }
-//                                            }
-//                                            break;
-//                                        case "amazing2":
-//                                            while (attempt < maxAttempts) {
-//                                                try {
-//                                                    reasoner = new ReasonerAmazing2("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
-//                                                    reasoner.diagnoseProblem();
-//                                                    success = true;
-//                                                    break;
-//                                                } catch (OutOfMemoryError | Exception e) {
-//                                                    e.printStackTrace();
-//                                                    attempt += 1;
-//                                                }
-//                                            }
-//                                            break;
-//                                        case "amazing3":
-//                                            while (attempt < maxAttempts) {
-//                                                try {
-//                                                    reasoner = new ReasonerAmazing3("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
-//                                                    reasoner.diagnoseProblem();
-//                                                    success = true;
-//                                                    break;
-//                                                } catch (OutOfMemoryError | Exception e) {
-//                                                    e.printStackTrace();
-//                                                    attempt += 1;
-//                                                }
-//                                            }
-//                                            break;
-//                                        case "amazing4":
-//                                            while (attempt < maxAttempts) {
-//                                                try {
-//                                                    reasoner = new ReasonerAmazing4("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
-//                                                    reasoner.diagnoseProblem();
-//                                                    success = true;
-//                                                    break;
-//                                                } catch (OutOfMemoryError | Exception e) {
-//                                                    e.printStackTrace();
-//                                                    attempt += 1;
-//                                                }
-//                                            }
-//                                            break;
                                         case "amazing5":
                                             while (attempt < maxAttempts) {
                                                 try {
-                                                    reasoner = new ReasonerAmazing5("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability);
+                                                    reasoner = new ReasonerAmazing5("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability, timeout);
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;

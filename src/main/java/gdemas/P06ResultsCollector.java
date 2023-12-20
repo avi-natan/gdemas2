@@ -38,22 +38,10 @@ public class P06ResultsCollector {
                             File resultSmart = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                     "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-smart-results.txt");
-//                            File resultAmazing = new File(problemFolder,
-//                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
-//                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing-results.txt");
-//                            File resultAmazing2 = new File(problemFolder,
-//                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
-//                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing2-results.txt");
-//                            File resultAmazing3 = new File(problemFolder,
-//                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
-//                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing3-results.txt");
-//                            File resultAmazing4 = new File(problemFolder,
-//                                    "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
-//                                            "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing4-results.txt");
                             File resultAmazing5 = new File(problemFolder,
                                     "/" + f + "/" + domainFolder.getName() + "-" + problemFolder.getName() +
                                             "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-amazing5-results.txt");
-                            print(resultSmart.getAbsolutePath());
+                            print(resultSimple.getAbsolutePath());
 
                             String comparable;
                             if (resultSimple.exists() && resultSmart.exists() && resultAmazing5.exists()) {
@@ -77,38 +65,6 @@ public class P06ResultsCollector {
                                 records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "smart"));
                                 countNo += 1;
                             }
-
-//                            if (resultAmazing.exists()) {
-//                                records.add(createSuccessfulRecord(resultAmazing, comparable));
-//                                countYes += 1;
-//                            } else {
-//                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing"));
-//                                countNo += 1;
-//                            }
-
-//                            if (resultAmazing2.exists()) {
-//                                records.add(createSuccessfulRecord(resultAmazing2, comparable));
-//                                countYes += 1;
-//                            } else {
-//                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing2"));
-//                                countNo += 1;
-//                            }
-
-//                            if (resultAmazing3.exists()) {
-//                                records.add(createSuccessfulRecord(resultAmazing3, comparable));
-//                                countYes += 1;
-//                            } else {
-//                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing3"));
-//                                countNo += 1;
-//                            }
-
-//                            if (resultAmazing4.exists()) {
-//                                records.add(createSuccessfulRecord(resultAmazing4, comparable));
-//                                countYes += 1;
-//                            } else {
-//                                records.add(createFailedRecord(domainFolder, problemFolder, f, r, o, "amazing4"));
-//                                countNo += 1;
-//                            }
 
                             if (resultAmazing5.exists()) {
                                 records.add(createSuccessfulRecord(resultAmazing5, comparable));
@@ -169,6 +125,7 @@ public class P06ResultsCollector {
         rec._SOLVING_RUNTIME           = resultStrings[c++].split(":")[1];
         rec._COMBINING_RUNTIME         = resultStrings[c++].split(":")[1];
         rec._TOTAL_RUNTIME             = resultStrings[c++].split(":")[1];
+        rec._TIMEDOUT                  = resultStrings[c++].split(":")[1];
         rec._LOCAL_INTERNAL_ACTIONS_NUMBERS   = resultStrings[c++].split(":")[1];
         rec._LOCAL_INTERNAL_ACTIONS_MIN       =resultStrings[c++].split(":")[1];
         rec._LOCAL_INTERNAL_ACTIONS_MAX       =resultStrings[c++].split(":")[1];
@@ -223,6 +180,7 @@ public class P06ResultsCollector {
         rec._SOLVING_RUNTIME           = "-";
         rec._COMBINING_RUNTIME         = "-";
         rec._TOTAL_RUNTIME             = "-";
+        rec._TIMEDOUT                  = "-";
         rec._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "-";
         rec._LOCAL_INTERNAL_ACTIONS_MIN       = "-";
         rec._LOCAL_INTERNAL_ACTIONS_MAX       = "-";

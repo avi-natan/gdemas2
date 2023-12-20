@@ -39,6 +39,7 @@ public class Record {
             "# S Runtime",
             "# Combining runtime",
             "# Total runtime",
+            "# TimedOut",
             "Local internal actions numbers",
             "# Local internal actions min",
             "# Local internal actions max",
@@ -87,6 +88,7 @@ public class Record {
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _TOTAL_RUNTIME;
+    public int                              _TIMEDOUT;
     public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;
     public int                              _LOCAL_INTERNAL_ACTIONS_MIN;
     public int                              _LOCAL_INTERNAL_ACTIONS_MAX;
@@ -135,6 +137,7 @@ public class Record {
         this._SOLVING_RUNTIME           = r.getSolvingRuntime();
         this._COMBINING_RUNTIME         = r.getCombiningRuntime();
         this._TOTAL_RUNTIME             = r.getTotalRuntime();
+        this._TIMEDOUT                  = r.getTimedOut();
         this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = r.getLocalInternalActionsNumbers();
         this._LOCAL_INTERNAL_ACTIONS_MIN       = r.getLocalInternalActionsMin();
         this._LOCAL_INTERNAL_ACTIONS_MAX       = r.getLocalInternalActionsMax();
@@ -182,6 +185,8 @@ public class Record {
         row.createCell(c++).setCellValue(this._SOLVING_DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
+        row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
+        row.createCell(c++).setCellValue(this._TIMEDOUT);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MAX);
@@ -191,7 +196,6 @@ public class Record {
         row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_TOTAL_ACTIONS_MAX);
-        row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
@@ -231,6 +235,7 @@ public class Record {
                 "# S Runtime:" + this._SOLVING_RUNTIME + "\n" +
                 "# Combining runtime:" + this._COMBINING_RUNTIME + "\n" +
                 "# Total runtime:" + this._TOTAL_RUNTIME + "\n" +
+                "# TimedOut:" + this._TIMEDOUT + "\n" +
                 "Local internal actions numbers:" + this._LOCAL_INTERNAL_ACTIONS_NUMBERS + "\n" +
                 "# Local internal actions min:" + this._LOCAL_INTERNAL_ACTIONS_MIN + "\n" +
                 "# Local internal actions max:" + this._LOCAL_INTERNAL_ACTIONS_MAX + "\n" +

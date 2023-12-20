@@ -31,8 +31,9 @@ public class ReasonerSimple extends Reasoner {
                           File      combinedPlanFile,
                           File      faultsFile,
                           File      trajectoryFile,
-                          String    observability) {
-        super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability);
+                          String    observability,
+                          long      timeout) {
+        super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability, timeout);
         this._REASONER_NAME = "simple";
         this.relevantGroundedPlanPredicates = this.computeRelevantGroundedPlanPredicates();
         this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "[" + this.countActions() + "]";
@@ -99,18 +100,8 @@ public class ReasonerSimple extends Reasoner {
 
 //        print(999);
 
-        // solve problem
-//        print(java.time.LocalTime.now() + ": " + "solving...");
-        start = Instant.now();
-        this.solveProblem();
-        end = Instant.now();
-        this._SOLVING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
-        this._SOLVING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
-        this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);
-        this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
-        this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
-        this._SOLVING_DIAGNOSES_NUM = this.diagnoses.size();
-        this._SOLVING_RUNTIME = Duration.between(start, end).toMillis();
+        // solve problem (metrics are recorded within the problem-solving function)
+        this.solveProblem(this._TIMEOUT);
 
         // combine diagnoses
         this._COMBINING_RUNTIME = 0;
@@ -295,15 +286,39 @@ public class ReasonerSimple extends Reasoner {
         }
     }
 
-    private void solveProblem() {
+    private void solveProblem(long timeout) {
         Solver solver = this.model.getSolver();
+
+        solver.limitTime(timeout);
+        long cumulativeRuntimeMS;
+        boolean isStopMet;
+
         Solution s = solver.findSolution();
+        cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+        isStopMet = solver.isStopCriterionMet();
+
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
             if (!this.containsDiagnosis(this.diagnoses, d)) {
                 this.diagnoses.add(d);
             }
+
             s = solver.findSolution();
+            cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+            isStopMet = solver.isStopCriterionMet();
+        }
+
+        this._SOLVING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
+        this._SOLVING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
+        this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this._COMBINED_PLAN_ACTIONS);
+        this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+        this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+        this._SOLVING_DIAGNOSES_NUM = this.diagnoses.size();
+        this._SOLVING_RUNTIME = cumulativeRuntimeMS;
+        if (isStopMet) {
+            this._TIMEDOUT = 1;
+        } else {
+            this._TIMEDOUT = 0;
         }
     }
 

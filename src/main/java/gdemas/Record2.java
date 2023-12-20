@@ -35,6 +35,7 @@ public class Record2 {
             "# S Runtime",
             "# Combining runtime",
             "# Total runtime",
+            "# TimedOut",
             "Local internal actions numbers",
             "# Local internal actions min",
             "# Local internal actions max",
@@ -85,6 +86,7 @@ public class Record2 {
     public String                           _SOLVING_RUNTIME;               // long
     public String                           _COMBINING_RUNTIME;             // long
     public String                           _TOTAL_RUNTIME;                 // long
+    public String                           _TIMEDOUT;                      // int
     public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;// String
     public String                           _LOCAL_INTERNAL_ACTIONS_MIN;    // int
     public String                           _LOCAL_INTERNAL_ACTIONS_MAX;    // int
@@ -142,6 +144,7 @@ public class Record2 {
         row.createCell(c++).setCellValue(this._SOLVING_RUNTIME);
         row.createCell(c++).setCellValue(this._COMBINING_RUNTIME);
         row.createCell(c++).setCellValue(this._TOTAL_RUNTIME);
+        row.createCell(c++).setCellValue(this._TIMEDOUT);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_MAX);
@@ -192,6 +195,7 @@ public class Record2 {
         row.createCell(c++).setCellValue(Long.parseLong(this._SOLVING_RUNTIME));
         row.createCell(c++).setCellValue(Long.parseLong(this._COMBINING_RUNTIME));
         row.createCell(c++).setCellValue(Long.parseLong(this._TOTAL_RUNTIME));
+        row.createCell(c++).setCellValue(Integer.parseInt(this._TIMEDOUT));
         row.createCell(c++).setCellValue(this._LOCAL_INTERNAL_ACTIONS_NUMBERS);
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_INTERNAL_ACTIONS_MIN));
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_INTERNAL_ACTIONS_MAX));

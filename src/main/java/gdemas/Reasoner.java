@@ -14,6 +14,7 @@ public abstract class Reasoner {
     public List<String>                     _FAULTS;
     public List<List<String>>               _TRAJECTORY;
     public List<Integer>                    _OBSERVABLE_STATES;
+    public long                             _TIMEOUT;
 
     // output members
     // controlled parameters
@@ -48,6 +49,7 @@ public abstract class Reasoner {
     public long                             _SOLVING_RUNTIME;
     public long                             _COMBINING_RUNTIME;
     public long                             _TOTAL_RUNTIME;
+    public int                              _TIMEDOUT;
     public String                           _LOCAL_INTERNAL_ACTIONS_NUMBERS;
     public int                              _LOCAL_INTERNAL_ACTIONS_MIN;
     public int                              _LOCAL_INTERNAL_ACTIONS_MAX;
@@ -71,7 +73,8 @@ public abstract class Reasoner {
                     File    combinedPlanFile,
                     File    faultsFile,
                     File    trajectoryFile,
-                    String  observability) {
+                    String  observability,
+                    long    timeout) {
         // Operational members
         this._DOMAIN                    = Parser.parseDomain(domainFile);
         this._PROBLEM                   = Parser.parseProblem(problemFile);
@@ -81,6 +84,7 @@ public abstract class Reasoner {
         this._FAULTS                    = Parser.parseFaults(faultsFile);
         this._TRAJECTORY                = Parser.parseTrajectory(trajectoryFile);
         this._OBSERVABLE_STATES         = this.computeObservableStates(observability, this._TRAJECTORY.size());
+        this._TIMEOUT                   = timeout;
 
         // output members
         // controlled parameters
@@ -115,6 +119,7 @@ public abstract class Reasoner {
         this._SOLVING_RUNTIME           = 0;
         this._COMBINING_RUNTIME         = 0;
         this._TOTAL_RUNTIME             = 0;
+        this._TIMEDOUT                  = -1;
         this._LOCAL_INTERNAL_ACTIONS_NUMBERS   = "";
         this._LOCAL_INTERNAL_ACTIONS_MIN       = 0;
         this._LOCAL_INTERNAL_ACTIONS_MAX       = 0;
@@ -313,6 +318,9 @@ public abstract class Reasoner {
     }
     public long getTotalRuntime() {
         return _TOTAL_RUNTIME;
+    }
+    public int getTimedOut() {
+        return _TIMEDOUT;
     }
     public String getLocalInternalActionsNumbers() {
         return _LOCAL_INTERNAL_ACTIONS_NUMBERS;
