@@ -241,8 +241,8 @@ public class ReasonerAmazing5 extends Reasoner {
             this.vmap = new BijectiveMap<>();
 
             // model problem
-            // offline part
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling offline part...");
+            // offline part
             this.modelProblemOfflinePart(qA);
             // online part + measuring
             this.modelProblemOnlinePart(A, qA);
@@ -297,12 +297,12 @@ public class ReasonerAmazing5 extends Reasoner {
 
         // transition of variables in the effects of an external action in a guilty state
         this.constraintTransitionExternalGuiltyState(qA);
-
-        // observation
-        this.constraintObservation(qA);
     }
 
     private void modelProblemOnlinePart(int A, int qA) {
+        // observation
+        this.constraintObservation(A, qA);
+
         // possibleHealthStates
         this.constraintPossibleHealthStates(A, qA);
     }
@@ -523,8 +523,34 @@ public class ReasonerAmazing5 extends Reasoner {
         return rel;
     }
 
-    private void constraintObservation(int qA) {
+    private void constraintObservation(int A, int qA) {
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling possible health states...");
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        if (remainingAllowedTime <= 0) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._MODELLING_RUNTIME = 0;
+            }
+            if (A != 0) {
+                this._TOTAL_RUNTIME += 0;
+//                print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + 0);
+            }
+            return;
+        }
+
+        // initiating the runtime counter for this function
+        long elapsedOnlineModelTime = 0L;
+        Instant start;
+        Instant end;
+
+
         for (Integer t : this._OBSERVABLE_STATES) {
+            start = Instant.now();
             for (String gp: this.agentsPredicates.get(qA)) {
                 if (this._TRAJECTORY.get(t).contains(gp)) {
                     this.model.and(this.vmap.getValue("S:" + t + ":" + gp)).post();
@@ -532,6 +558,51 @@ public class ReasonerAmazing5 extends Reasoner {
                     this.model.not(this.model.and(this.vmap.getValue("S:" + t + ":" + gp))).post();
                 }
             }
+            end = Instant.now();
+            elapsedOnlineModelTime += Duration.between(start, end).toMillis();
+            if (elapsedOnlineModelTime >= remainingAllowedTime) {
+                this._TIMEDOUT = 1;
+                if (A == 0) {
+                    this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                    this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                    this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                    this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                    this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                    this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+                } else if (elapsedOnlineModelTime > this._MODELLING_RUNTIME) {
+                    this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                    this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                    this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                    this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                    this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                    this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+                }
+                if (A != 0) {
+                    this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+//                    print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
+                }
+                return;
+            }
+        }
+
+        if (A == 0) {
+            this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+            this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+        } else if (elapsedOnlineModelTime > this._MODELLING_RUNTIME) {
+            this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+            this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+        }
+        if (A != 0) {
+            this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
         }
     }
 

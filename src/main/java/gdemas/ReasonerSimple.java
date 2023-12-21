@@ -88,8 +88,12 @@ public class ReasonerSimple extends Reasoner {
 
         // model problem
 //        print(java.time.LocalTime.now() + ": " + "modelling...");
+        // offline part modelling
+        this.modelProblemOfflinePart();
+
+        // online part modelling
         Instant start = Instant.now();
-        this.modelProblem();
+        this.modelProblemOnlinePart();
         Instant end = Instant.now();
         this._MODELLING_AGENT_NAME = String.join(",", this._AGENT_NAMES);
         this._MODELLING_PREDICATES_NUM = this.relevantGroundedPlanPredicates.size();
@@ -117,7 +121,7 @@ public class ReasonerSimple extends Reasoner {
 //        print(34);
     }
 
-    private void modelProblem() {
+    private void modelProblemOfflinePart() {
         // initialize state variables
         this.initializeStateVariables();
 
@@ -139,7 +143,9 @@ public class ReasonerSimple extends Reasoner {
 
         // transition of variables in the effects of an action in a conflict state
         this.constraintTransitionConflictState();
+    }
 
+    private void modelProblemOnlinePart() {
         // observation
         this.constraintObservation();
     }

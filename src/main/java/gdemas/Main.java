@@ -74,30 +74,11 @@ public class Main {
 //        chocoLibraryTest();
     }
 
-    private static void chocoLibraryTest() {
-        Model model = new Model();
-        BoolVar h = model.boolVar("x1");
-        BoolVar f = model.boolVar("x2");
-        BoolVar c = model.boolVar("x3");
-        BoolVar[] vars = {h,f,c};
-        model.sum(vars, "=", 1).post();
-
-        Solver solver = model.getSolver();
-        Solution s = solver.findSolution();
-        while (s != null) {
-            print("h: " + s.getIntVal(h));
-            print("h: " + s.getIntVal(f));
-            print("c: " + s.getIntVal(c));
-            print("");
-            s = solver.findSolution();
-        }
-    }
-
     private static void manualExecutionWhileWritingAlg() {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-13-0";
+        String problemName = "probLOGISTICS-4-0";
         int faultsNum = 2;
         int repetitionNum = 1;
         String observability = "1p";

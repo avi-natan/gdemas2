@@ -196,8 +196,12 @@ public class ReasonerSmart extends Reasoner {
 
             // model problem
 //            print(java.time.LocalTime.now() + " agent " + (A+1) + "/" + this._AGENTS_NUM + ": " + "modelling...");
+            // offline part modelling
+            this.modelProblemOfflinePart(A);
+
+            // online part modelling
             Instant start = Instant.now();
-            this.modelProblem(A);
+            this.modelProblemOnlinePart(A);
             Instant end = Instant.now();
             long runtime = Duration.between(start, end).toMillis();
             if (A == 0) {
@@ -237,7 +241,7 @@ public class ReasonerSmart extends Reasoner {
 //        print(34);
     }
 
-    private void modelProblem(int A) {
+    private void modelProblemOfflinePart(int A) {
         // initialize state variables
         this.initializeStateVariables(A);
 
@@ -265,7 +269,9 @@ public class ReasonerSmart extends Reasoner {
 
         // transition of variables in the effects of an action in a guilty state
         this.constraintTransitionGuiltyState(A);
+    }
 
+    private void modelProblemOnlinePart (int A) {
         // observation
         this.constraintObservation(A);
     }
