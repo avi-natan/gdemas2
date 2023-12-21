@@ -240,88 +240,29 @@ public class ReasonerAmazing5 extends Reasoner {
             // initialize the variable map
             this.vmap = new BijectiveMap<>();
 
-//            // print some metadata
-//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": metadata:");
-//            print("Relevant predicates number: " + this.agentsPredicates.get(qA).size());
-//            print("Relevant actions number: " + this.countActionsNumber(this.agentsPlanActions.get(qA)));
-//            double external = this.countExternalActions(qA);
-//            double internal = this.countInternalActions(qA);
-//            print("Relevant external actions number: " + external);
-//            print("Relevant internal actions number: " + internal);
-//            print("External/Internal actions rate: " + external / internal);
-
             // model problem
             // offline part
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling offline part...");
             this.modelProblemOfflinePart(qA);
             // online part + measuring
-//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling online part...");
-            Instant start = Instant.now();
-            this.modelProblemOnlinePart(qA);
-            Instant end = Instant.now();
-            long runtime = Duration.between(start, end).toMillis();
-            if (A == 0) {
-                this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
-                this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
-                this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
-                this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
-                this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
-                this._MODELLING_RUNTIME = runtime;
-            } else if (runtime > this._MODELLING_RUNTIME) {
-                this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
-                this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
-                this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
-                this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
-                this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
-                this._MODELLING_RUNTIME = runtime;
-            }
-            if (A != 0) {
-                this._TOTAL_RUNTIME += runtime;
-//                print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": Model time in MS: " + runtime);
-            }
+            this.modelProblemOnlinePart(A, qA);
 
 //            print(999);
 
-            // solve problem
-//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
-            start = Instant.now();
-            this.solveProblem(qA);
-            end = Instant.now();
-            runtime = Duration.between(start, end).toMillis();
-            if (A == 0) {
-                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
-                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
-                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
-                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
-                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
-                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
-                this._SOLVING_RUNTIME = runtime;
-            } else if (runtime > this._SOLVING_RUNTIME) {
-                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
-                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
-                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
-                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
-                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
-                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
-                this._SOLVING_RUNTIME = runtime;
-            }
-            this._TOTAL_RUNTIME += runtime;
-//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + runtime);
-//            print("");
+            // solve problem (metrics are recorded within the problem-solving function)
+            this.solveProblem(A, qA);
         }
 
-        // combining diagnoses
-//        print(java.time.LocalTime.now() + ": " + "combining...");
-        Instant start = Instant.now();
-        this.combineDiagnoses();
-        Instant end = Instant.now();
-        this._COMBINING_RUNTIME = Duration.between(start, end).toMillis();
-        this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
+        // measurements after local diagnoses
         this._LOCAL_DIAGNOSES_NUMBERS = this.agentsDiagnoses.stream().map(List::size).collect(Collectors.toList()).toString();
         this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
         this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
-        this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME);
+
+        // combining diagnoses
+        this.combineDiagnoses();
+
+        // summary
+        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Accumulated solving time in MS: " + (this._TOTAL_RUNTIME - this._COMBINING_RUNTIME) + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME + ", Timedout: " + this._TIMEDOUT);
 
         // print diagnoses
 //        this.printDiagnoses();
@@ -361,9 +302,9 @@ public class ReasonerAmazing5 extends Reasoner {
         this.constraintObservation(qA);
     }
 
-    private void modelProblemOnlinePart(int qA) {
+    private void modelProblemOnlinePart(int A, int qA) {
         // possibleHealthStates
-        this.constraintPossibleHealthStates(qA);
+        this.constraintPossibleHealthStates(A, qA);
     }
 
     private void initializeStateVariables(int qA) {
@@ -594,8 +535,34 @@ public class ReasonerAmazing5 extends Reasoner {
         }
     }
 
-    private void constraintPossibleHealthStates(int qA) {
+    private void constraintPossibleHealthStates(int A, int qA) {
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling possible health states...");
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        if (remainingAllowedTime <= 0) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._MODELLING_RUNTIME = 0;
+            }
+            if (A != 0) {
+                this._TOTAL_RUNTIME += 0;
+//                print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + 0);
+            }
+            return;
+        }
+
+        // initiating the runtime counter for this function
+        long elapsedOnlineModelTime = 0L;
+        Instant start;
+        Instant end;
+
+
         for (RelevantAction ra : this.currentAgent.getRelevantActions()) {
+            start = Instant.now();
             List<String> possibleValues = ra.getPossibleValues();
             int t = ra.getActionT();
             int a = ra.getActionA();
@@ -612,35 +579,257 @@ public class ReasonerAmazing5 extends Reasoner {
                 }
             }
             this.model.or(possibleHealthValues).post();
+            end = Instant.now();
+            elapsedOnlineModelTime += Duration.between(start, end).toMillis();
+            if (elapsedOnlineModelTime >= remainingAllowedTime) {
+                this._TIMEDOUT = 1;
+                if (A == 0) {
+                    this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                    this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                    this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                    this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                    this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                    this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+                } else if (elapsedOnlineModelTime > this._MODELLING_RUNTIME) {
+                    this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                    this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                    this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                    this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+                    this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                    this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+                }
+                if (A != 0) {
+                    this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+//                    print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
+                }
+                return;
+            }
+        }
+
+        if (A == 0) {
+            this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+            this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+        } else if (elapsedOnlineModelTime > this._MODELLING_RUNTIME) {
+            this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
+            this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._MODELLING_RUNTIME = elapsedOnlineModelTime;
+        }
+        if (A != 0) {
+            this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
         }
     }
 
-    private void solveProblem(int qA) {
+    private void solveProblem(int A, int qA) {
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
+        // the part about if there is no time from the beginning
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        if (remainingAllowedTime <= 0) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = 0;
+            }
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + 0);
+            return;
+        }
+
+        // initiating the runtime counter for this function
+        long elapsedSolvingTime = 0L;
+        Instant start;
+        Instant end;
+
+
+
+        // the part about the preparing the health states
+        start = Instant.now();
         List<List<String>> updatedRelevantActionsHealthStates = new ArrayList<>();
         for (RelevantAction ra : this.currentAgent.getRelevantActions()) {
             updatedRelevantActionsHealthStates.add(new ArrayList<>());
         }
+        end = Instant.now();
+        elapsedSolvingTime += Duration.between(start, end).toMillis();
+        if (elapsedSolvingTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            } else if (elapsedSolvingTime > this._SOLVING_RUNTIME) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            }
+            this._TOTAL_RUNTIME += elapsedSolvingTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
+            return;
+        }
+
+
+
+        // the part about the running the solver
         Solver solver = this.model.getSolver();
+        solver.limitTime(remainingAllowedTime - elapsedSolvingTime);
+        int searchCount = 0;
+        long cumulativeRuntimeMSPrev;
+        long cumulativeRuntimeMS = 0;
+        long runtimeMS;
+        boolean isStopMet;
+        searchCount += 1;
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "before " + searchCount);
         Solution s = solver.findSolution();
+        cumulativeRuntimeMSPrev = cumulativeRuntimeMS;
+        cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+        runtimeMS = cumulativeRuntimeMS - cumulativeRuntimeMSPrev;
+        isStopMet = solver.isStopCriterionMet();
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "after " + searchCount + ", runtime in MS: " + runtimeMS + ", cumulative runtime in MS: " + cumulativeRuntimeMS + ". Stop criterion met: " + isStopMet + ", Was solution found: " + (s!=null));
         while (s != null) {
             Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
             if (!this.containsDiagnosis(this.agentsDiagnoses.get(qA), d)) {
                 this.agentsDiagnoses.get(qA).add(d);
             }
-            this.updateRelevantActionsHealthStates(updatedRelevantActionsHealthStates, d);
+            searchCount += 1;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "before " + searchCount);
             s = solver.findSolution();
+            cumulativeRuntimeMSPrev = cumulativeRuntimeMS;
+            cumulativeRuntimeMS = solver.getTimeCountInNanoSeconds() / (1000 * 1000);
+            runtimeMS = cumulativeRuntimeMS - cumulativeRuntimeMSPrev;
+            isStopMet = solver.isStopCriterionMet();
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "after " + searchCount  + ", runtime in MS: " + runtimeMS + ", cumulative runtime in MS: " + cumulativeRuntimeMS + ". Stop criterion met: " + isStopMet + ", Was solution found: " + (s!=null));
         }
+        elapsedSolvingTime += cumulativeRuntimeMS;
+        if (isStopMet) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            } else if (elapsedSolvingTime > this._SOLVING_RUNTIME) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            }
+            this._TOTAL_RUNTIME += elapsedSolvingTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
+            return;
+        }
+
+
+
+        // the part about the updating the health states
+        start = Instant.now();
+        for (Diagnosis d : this.agentsDiagnoses.get(qA)) {
+            this.updateRelevantActionsHealthStates(updatedRelevantActionsHealthStates, d);
+        }
+        end = Instant.now();
+        elapsedSolvingTime += Duration.between(start, end).toMillis();
+        if (elapsedSolvingTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            } else if (elapsedSolvingTime > this._SOLVING_RUNTIME) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            }
+            this._TOTAL_RUNTIME += elapsedSolvingTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
+            return;
+        }
+
+
+
+        // the part about setting possible updated values to relevant actions
+        start = Instant.now();
         for (int u = 0; u < updatedRelevantActionsHealthStates.size(); u++) {
             this.currentAgent.getRelevantActions().get(u).setPossibleValues(updatedRelevantActionsHealthStates.get(u));
         }
-        // try this after the cluster starts working again
-//        while (model.getSolver().solve()){
-//            Solution s = new Solution(model).record();
-//            Diagnosis d = new Diagnosis(s, this.vmap, this._PLAN_LENGTH, this._AGENTS_NUM);
-//            if (!this.containsDiagnosis(this.agentsDiagnoses.get(qA), d)) {
-//                this.agentsDiagnoses.get(qA).add(d);
-//            }
-//        }
+        end = Instant.now();
+        elapsedSolvingTime += Duration.between(start, end).toMillis();
+        if (elapsedSolvingTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            if (A == 0) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            } else if (elapsedSolvingTime > this._SOLVING_RUNTIME) {
+                this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+                this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+                this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+                this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+                this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+                this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+                this._SOLVING_RUNTIME = elapsedSolvingTime;
+            }
+            this._TOTAL_RUNTIME += elapsedSolvingTime;
+//            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
+            return;
+        }
+
+
+
+        // the part that if everything went without timeout
+        if (A == 0) {
+            this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+            this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+            this._SOLVING_RUNTIME = elapsedSolvingTime;
+        } else if (elapsedSolvingTime > this._SOLVING_RUNTIME) {
+            this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
+            this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
+            this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
+            this._SOLVING_VARIABLES_NUM = this.model.getNbVars();
+            this._SOLVING_CONSTRAINTS_NUM = this.model.getNbCstrs();
+            this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
+            this._SOLVING_RUNTIME = elapsedSolvingTime;
+        }
+        this._TOTAL_RUNTIME += elapsedSolvingTime;
+//        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Individual time in MS: " + elapsedSolvingTime + ", Cumulative time in MS: " + this._TOTAL_RUNTIME);
     }
 
     private void updateRelevantActionsHealthStates(List<List<String>> updatedRelevantActionsHealthStates, Diagnosis d) {
@@ -692,16 +881,53 @@ public class ReasonerAmazing5 extends Reasoner {
     }
 
     private void combineDiagnoses() {
+//        print(java.time.LocalTime.now() + ": " + "combining...");
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        if (remainingAllowedTime <= 0) {
+            this._TIMEDOUT = 1;
+            this._COMBINING_RUNTIME = 0;
+            this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+            return;
+        }
+
+        // initiating the runtime counter for this function
+        long elapsedCombiningTime = 0L;
+        Instant start;
+        Instant end;
+
+        start = Instant.now();
         List<Integer> sortedByLocalDiagnosesNum = sortByLocalDiagnosesNum(this.agentsDiagnoses);
+        end = Instant.now();
+        elapsedCombiningTime += Duration.between(start, end).toMillis();
+//        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME +  ": Local diagnoses sort time in MS: " + Duration.between(start, end).toMillis() + ", Elapsed time: " + elapsedCombiningTime + "/" + remainingAllowedTime);
+        if (elapsedCombiningTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            this._COMBINING_RUNTIME = elapsedCombiningTime;
+            this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
+            this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+            return;
+        }
 
         // creating partial global diagnoses out of the local diagnoses of the first agent
+        start = Instant.now();
         initialPartialGlobalDiagnoses(sortedByLocalDiagnosesNum.get(0));
+        end = Instant.now();
+        elapsedCombiningTime += Duration.between(start, end).toMillis();
+//        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME +  ": Initial partial global diagnoses time in MS: " + Duration.between(start, end).toMillis() + ", Elapsed time: " + elapsedCombiningTime + "/" + remainingAllowedTime);
+        if (elapsedCombiningTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            this._COMBINING_RUNTIME = elapsedCombiningTime;
+            this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
+            this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+            return;
+        }
 
         // combining the global diagnoses with the local diagnoses of every subsequent agent
         for (int a = 1; a < sortedByLocalDiagnosesNum.size(); a++) {
             List<GlobalDiagnosis> newGlobalDiagnoses = new ArrayList<>();
             for (GlobalDiagnosis gd: this.globalDiagnoses) {
                 for (int d = 0; d < this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).size(); d++) {
+                    start = Instant.now();
                     Diagnosis ld = this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).get(d);
                     GlobalDiagnosis ngd = createNewGlobalDiagnosis(gd, ld, sortedByLocalDiagnosesNum.get(a), d);
                     if (ngd != null) {
@@ -709,10 +935,25 @@ public class ReasonerAmazing5 extends Reasoner {
                             newGlobalDiagnoses.add(ngd);
                         }
                     }
+                    end = Instant.now();
+                    elapsedCombiningTime += Duration.between(start, end).toMillis();
+                    if (elapsedCombiningTime >= remainingAllowedTime) {
+                        this._TIMEDOUT = 1;
+                        this._COMBINING_RUNTIME = elapsedCombiningTime;
+                        this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
+                        this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+//                        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME +  ": Combining for agent " + a + " time in MS: " + Duration.between(start, end).toMillis() + ", Elapsed time: " + elapsedCombiningTime + "/" + remainingAllowedTime);
+                        return;
+                    }
                 }
             }
             this.globalDiagnoses = newGlobalDiagnoses;
         }
+
+        this._COMBINING_RUNTIME = elapsedCombiningTime;
+        this._TOTAL_RUNTIME += this._COMBINING_RUNTIME;
+        this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+//        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME +  ": Combine time in MS: " + this._COMBINING_RUNTIME + ", Elapsed time: " + elapsedCombiningTime + "/" + remainingAllowedTime);
     }
 
     private List<Integer> sortByLocalDiagnosesNum(List<List<Diagnosis>> agentsDiagnoses) {

@@ -218,7 +218,7 @@ public class ReasonerSmart extends Reasoner {
 
 //            print(999);
 
-            // solve problem
+            // solve problem (metrics are recorded within the problem-solving function)
             this.solveProblem(A);
         }
 
@@ -230,7 +230,7 @@ public class ReasonerSmart extends Reasoner {
         // combining diagnoses
 //        print(java.time.LocalTime.now() + ": " + "combining...");
         this.combineDiagnoses();
-        print(java.time.LocalTime.now() + ": Smart - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME);
+        print(java.time.LocalTime.now() + ": Smart - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME + ", Timedout: " + this._TIMEDOUT);
 
         // print diagnoses
 //        this.printDiagnoses();
@@ -576,19 +576,32 @@ public class ReasonerSmart extends Reasoner {
             this._DIAGNOSES_NUM = this.globalDiagnoses.size();
             return;
         }
+
+        // initiating the runtime counter for this function
         long elapsedCombiningTime = 0L;
+        Instant start;
+        Instant end;
 
+        start = Instant.now();
         List<Integer> sortedByLocalDiagnosesNum = sortByLocalDiagnosesNum(this.agentsDiagnoses);
-
         // creating partial global diagnoses out of the local diagnoses of the first agent
         initialPartialGlobalDiagnoses(sortedByLocalDiagnosesNum.get(0));
+        end = Instant.now();
+        elapsedCombiningTime += Duration.between(start, end).toMillis();
+        if (elapsedCombiningTime >= remainingAllowedTime) {
+            this._TIMEDOUT = 1;
+            this._COMBINING_RUNTIME = elapsedCombiningTime;
+            this._TOTAL_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
+            this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+            return;
+        }
 
         // combining the global diagnoses with the local diagnoses of every subsequent agent
-        Instant start = Instant.now();
         for (int a = 1; a < sortedByLocalDiagnosesNum.size(); a++) {
             List<GlobalDiagnosis> newGlobalDiagnoses = new ArrayList<>();
             for (GlobalDiagnosis gd: this.globalDiagnoses) {
                 for (int d = 0; d < this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).size(); d++) {
+                    start = Instant.now();
                     Diagnosis ld = this.agentsDiagnoses.get(sortedByLocalDiagnosesNum.get(a)).get(d);
                     GlobalDiagnosis ngd = createNewGlobalDiagnosis(gd, ld, sortedByLocalDiagnosesNum.get(a), d);
                     if (ngd != null) {
@@ -596,18 +609,18 @@ public class ReasonerSmart extends Reasoner {
                             newGlobalDiagnoses.add(ngd);
                         }
                     }
+                    end = Instant.now();
+                    elapsedCombiningTime += Duration.between(start, end).toMillis();
+                    if (elapsedCombiningTime >= remainingAllowedTime) {
+                        this._TIMEDOUT = 1;
+                        this._COMBINING_RUNTIME = elapsedCombiningTime;
+                        this._TOTAL_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
+                        this._DIAGNOSES_NUM = this.globalDiagnoses.size();
+                        return;
+                    }
                 }
             }
             this.globalDiagnoses = newGlobalDiagnoses;
-            Instant end = Instant.now();
-            elapsedCombiningTime += Duration.between(start, end).toMillis();
-            if (elapsedCombiningTime > remainingAllowedTime) {
-                this._TIMEDOUT = 1;
-                this._COMBINING_RUNTIME = elapsedCombiningTime;
-                this._TOTAL_RUNTIME = this._SOLVING_RUNTIME + this._COMBINING_RUNTIME;
-                this._DIAGNOSES_NUM = this.globalDiagnoses.size();
-                return;
-            }
         }
 
         this._COMBINING_RUNTIME = elapsedCombiningTime;

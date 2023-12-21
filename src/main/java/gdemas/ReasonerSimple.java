@@ -110,7 +110,7 @@ public class ReasonerSimple extends Reasoner {
         this._LOCAL_DIAGNOSES_MIN = this.diagnoses.size();
         this._LOCAL_DIAGNOSES_MAX = this.diagnoses.size();
         this._DIAGNOSES_NUM = this.diagnoses.size();
-        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._TOTAL_RUNTIME);
+        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Time in MS: " + this._TOTAL_RUNTIME + ", Timedout: " + this._TIMEDOUT);
 
         // print diagnoses
 //        this.printDiagnoses();

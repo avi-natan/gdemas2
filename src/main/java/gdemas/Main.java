@@ -6,6 +6,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,24 +41,35 @@ public class Main {
         String p05executionMode = "new";
         String[] observabilities = {
                 "1p",
-//                "5p",
-//                "10p",
-//                "12p",
-//                "15p",
-//                "17p",
-//                "20p",
-//                "25p",
-//                "50p",
-//                "75p",
-//                "99p"
+                "5p",
+                "10p",
+                "12p",
+                "15p",
+                "17p",
+                "20p",
+                "25p",
+                "50p",
+                "75p",
+                "99p"
         };
-        long timeout = 2000;
+        long timeout = 10000;
+
+        Instant start = Instant.now();
         P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
+        Instant end = Instant.now();
+        long p5duration = Duration.between(start, end).toMillis();
 
         // pipeline 06 - results collection
+        start = Instant.now();
         P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+        end = Instant.now();
+        long p6duration = Duration.between(start, end).toMillis();
 
-        manualExecutionWhileWritingAlg();
+        print("p5 duration: " + p5duration);
+        print("p6 duration: " + p6duration);
+
+
+//        manualExecutionWhileWritingAlg();
 
 //        chocoLibraryTest();
     }
@@ -84,11 +97,11 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-4-0";
+        String problemName = "probLOGISTICS-13-0";
         int faultsNum = 2;
         int repetitionNum = 1;
         String observability = "1p";
-        long timeout = 2000;
+        long timeout = 4000;
 
         // input files based on the parameters
         File domainFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + domainName + "-domain.pddl");
@@ -100,7 +113,7 @@ public class Main {
 
         File resultsFileSimple = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-simple-results.txt");
         File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
-//        File resultsFileAmazing5 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing5-results.txt");
+        File resultsFileAmazing5 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing5-results.txt");
 
         List<Record> records = new ArrayList<>();
         Record record;
@@ -140,22 +153,23 @@ public class Main {
         record = new Record(smart);
         record.recordToTxtFile(resultsFileSmart);
 
-//        print(9);
-//        Reasoner amazing5 = new ReasonerAmazing5(
-//                benchmarkName,
-//                domainName,
-//                problemName,
-//                domainFile,
-//                problemFile,
-//                agentsFile,
-//                combinedPlanFile,
-//                faultsFile,
-//                trajectoryFile,
-//                observability
-//        );
-//        amazing5.diagnoseProblem();
-//        record = new Record(amazing5);
-//        record.recordToTxtFile(resultsFileAmazing5);
+        print(9);
+        Reasoner amazing5 = new ReasonerAmazing5(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability,
+                timeout
+        );
+        amazing5.diagnoseProblem();
+        record = new Record(amazing5);
+        record.recordToTxtFile(resultsFileAmazing5);
 
         print(777);
     }
