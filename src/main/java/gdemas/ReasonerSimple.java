@@ -45,6 +45,8 @@ public class ReasonerSimple extends Reasoner {
         this._LOCAL_TOTAL_ACTIONS_NUMBERS   = "[" + this.countActions() + "]";
         this._LOCAL_TOTAL_ACTIONS_MIN       = this.countActions();
         this._LOCAL_TOTAL_ACTIONS_MAX       = this.countActions();
+        this._SIZE_MAX_SUBGROUP             = this._AGENTS_NUM;
+        this._PERCENT_MAX_SUBGROUP          = this._SIZE_MAX_SUBGROUP * 100.0 / this._AGENTS_NUM;
         this.diagnoses = new ArrayList<>();
     }
 

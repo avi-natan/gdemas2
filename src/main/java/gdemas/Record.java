@@ -52,6 +52,8 @@ public class Record {
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
+            "# Size max subgroup",
+            "# Percent max subgroup",
             "# Diagnoses number"
     };
 
@@ -101,6 +103,8 @@ public class Record {
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
+    public int                              _SIZE_MAX_SUBGROUP;
+    public double                           _PERCENT_MAX_SUBGROUP;
     public int                              _DIAGNOSES_NUM;
 
     public Record(Reasoner r) {
@@ -150,6 +154,8 @@ public class Record {
         this._LOCAL_DIAGNOSES_NUMBERS   = r.getLocalDiagnosesNumbers();
         this._LOCAL_DIAGNOSES_MIN       = r.getLocalDiagnosesMin();
         this._LOCAL_DIAGNOSES_MAX       = r.getLocalDiagnosesMax();
+        this._SIZE_MAX_SUBGROUP         = r.getSizeMaxGroup();
+        this._PERCENT_MAX_SUBGROUP      = r.getPercentMaxSubgroup();
         this._DIAGNOSES_NUM             = r.getDiagnosesNum();
     }
 
@@ -199,6 +205,8 @@ public class Record {
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
+        row.createCell(c++).setCellValue(this._SIZE_MAX_SUBGROUP);
+        row.createCell(c++).setCellValue(this._PERCENT_MAX_SUBGROUP);
         row.createCell(c).setCellValue(this._DIAGNOSES_NUM);
     }
 
@@ -248,6 +256,8 @@ public class Record {
                 "Local diagnoses numbers:" + this._LOCAL_DIAGNOSES_NUMBERS + "\n" +
                 "# Local diagnoses min:" + this._LOCAL_DIAGNOSES_MIN + "\n" +
                 "# Local diagnoses max:" + this._LOCAL_DIAGNOSES_MAX + "\n" +
+                "# Size max subgroup:" + this._SIZE_MAX_SUBGROUP + "\n" +
+                "# Percent max subgroup:" + this._PERCENT_MAX_SUBGROUP + "\n" +
                 "# Diagnoses number:" + this._DIAGNOSES_NUM;
             writer.write(recordString);
         } catch (IOException e) {

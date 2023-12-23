@@ -57,13 +57,13 @@ public class Main {
         Instant start = Instant.now();
         P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
         Instant end = Instant.now();
-        long p5duration = Duration.between(start, end).toMillis();
+        long p5duration = Duration.between(start, end).toMinutes();
 
         // pipeline 06 - results collection
         start = Instant.now();
         P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
         end = Instant.now();
-        long p6duration = Duration.between(start, end).toMillis();
+        long p6duration = Duration.between(start, end).toMinutes();
 
         print("p5 duration: " + p5duration);
         print("p6 duration: " + p6duration);

@@ -149,6 +149,8 @@ public class P06ResultsCollector {
         rec._LOCAL_DIAGNOSES_NUMBERS   = resultStrings[c++].split(":")[1];
         rec._LOCAL_DIAGNOSES_MIN       = resultStrings[c++].split(":")[1];
         rec._LOCAL_DIAGNOSES_MAX       = resultStrings[c++].split(":")[1];
+        rec._SIZE_MAX_SUBGROUP         = resultStrings[c++].split(":")[1];
+        rec._PERCENT_MAX_SUBGROUP      = resultStrings[c++].split(":")[1];
         rec._DIAGNOSES_NUM             = resultStrings[c].split(":")[1];
         rec._SUCCESSFUL                = "yes";
         rec._COMPARABLE                = comparable;
@@ -204,6 +206,8 @@ public class P06ResultsCollector {
         rec._LOCAL_DIAGNOSES_NUMBERS   = "-";
         rec._LOCAL_DIAGNOSES_MIN       = "-";
         rec._LOCAL_DIAGNOSES_MAX       = "-";
+        rec._SIZE_MAX_SUBGROUP         = "-";
+        rec._PERCENT_MAX_SUBGROUP      = "-";
         rec._DIAGNOSES_NUM             = "-";
         rec._SUCCESSFUL                = "no";
         rec._COMPARABLE                = "no";

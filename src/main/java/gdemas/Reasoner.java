@@ -62,6 +62,8 @@ public abstract class Reasoner {
     public String                           _LOCAL_DIAGNOSES_NUMBERS;
     public int                              _LOCAL_DIAGNOSES_MIN;
     public int                              _LOCAL_DIAGNOSES_MAX;
+    public int                              _SIZE_MAX_SUBGROUP;
+    public double                           _PERCENT_MAX_SUBGROUP;
     public int                              _DIAGNOSES_NUM;
 
     public Reasoner(String  benchmarkName,
@@ -132,6 +134,8 @@ public abstract class Reasoner {
         this._LOCAL_DIAGNOSES_NUMBERS   = "";
         this._LOCAL_DIAGNOSES_MIN       = 0;
         this._LOCAL_DIAGNOSES_MAX       = 0;
+        this._SIZE_MAX_SUBGROUP         = 0;
+        this._PERCENT_MAX_SUBGROUP      = 0;
         this._DIAGNOSES_NUM             = 0;
     }
 
@@ -357,6 +361,12 @@ public abstract class Reasoner {
     }
     public int getLocalDiagnosesMax () {
         return this._LOCAL_DIAGNOSES_MAX;
+    }
+    public int getSizeMaxGroup () {
+        return this._SIZE_MAX_SUBGROUP;
+    }
+    public double getPercentMaxSubgroup () {
+        return this._PERCENT_MAX_SUBGROUP;
     }
     public int getDiagnosesNum() {
         return _DIAGNOSES_NUM;

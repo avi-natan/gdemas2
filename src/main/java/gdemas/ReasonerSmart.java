@@ -54,6 +54,8 @@ public class ReasonerSmart extends Reasoner {
         this._LOCAL_TOTAL_ACTIONS_NUMBERS   = new ArrayList<>(agentsTotalActionsNumbers).toString();
         this._LOCAL_TOTAL_ACTIONS_MIN       = agentsTotalActionsNumbers.stream().mapToInt(Integer::intValue).min().orElseThrow(NoSuchElementException::new);
         this._LOCAL_TOTAL_ACTIONS_MAX       = agentsTotalActionsNumbers.stream().mapToInt(Integer::intValue).max().orElseThrow(NoSuchElementException::new);
+        this._SIZE_MAX_SUBGROUP             = 1;
+        this._PERCENT_MAX_SUBGROUP          = this._SIZE_MAX_SUBGROUP * 100.0 / this._AGENTS_NUM;
         this.agentsDiagnoses = new ArrayList<>();
         for (int a = 0; a < this._AGENTS_NUM; a++) {
             this.agentsDiagnoses.add(new ArrayList<>());

@@ -48,6 +48,8 @@ public class Record2 {
             "Local diagnoses numbers",
             "# Local diagnoses min",
             "# Local diagnoses max",
+            "# Size max subgroup",
+            "# Percent max subgroup",
             "# Diagnoses number",
             "successful",
             "Comparable"
@@ -100,6 +102,8 @@ public class Record2 {
     public String                           _LOCAL_DIAGNOSES_MIN;           // int
     public String                           _LOCAL_DIAGNOSES_MAX;           // int
     public String                           _DIAGNOSES_NUM;                 // int
+    public String                           _SIZE_MAX_SUBGROUP;             // int
+    public String                           _PERCENT_MAX_SUBGROUP;          // double
     public String                           _SUCCESSFUL;                    // String
     public String                           _COMPARABLE;                    // String
 
@@ -157,6 +161,8 @@ public class Record2 {
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MIN);
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_MAX);
+        row.createCell(c++).setCellValue(this._SIZE_MAX_SUBGROUP);
+        row.createCell(c++).setCellValue(this._PERCENT_MAX_SUBGROUP);
         row.createCell(c++).setCellValue(this._DIAGNOSES_NUM);
         row.createCell(c++).setCellValue(this._SUCCESSFUL);
         row.createCell(c).setCellValue(this._COMPARABLE);
@@ -208,6 +214,8 @@ public class Record2 {
         row.createCell(c++).setCellValue(this._LOCAL_DIAGNOSES_NUMBERS);
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MIN));
         row.createCell(c++).setCellValue(Integer.parseInt(this._LOCAL_DIAGNOSES_MAX));
+        row.createCell(c++).setCellValue(Integer.parseInt(this._SIZE_MAX_SUBGROUP));
+        row.createCell(c++).setCellValue(Double.parseDouble(this._PERCENT_MAX_SUBGROUP));
         row.createCell(c++).setCellValue(Integer.parseInt(this._DIAGNOSES_NUM));
         row.createCell(c++).setCellValue(this._SUCCESSFUL);
         row.createCell(c).setCellValue(this._COMPARABLE);
