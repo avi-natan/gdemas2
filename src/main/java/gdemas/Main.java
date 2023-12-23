@@ -95,8 +95,8 @@ public class Main {
         File resultsFileSimple = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-simple-results.txt");
         File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
         File resultsFileAmazing5 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing5-results.txt");
+        File resultsFileWow = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-wow-results.txt");
 
-        List<Record> records = new ArrayList<>();
         Record record;
 
         Reasoner simple = new ReasonerSimple(
@@ -151,6 +151,24 @@ public class Main {
         amazing5.diagnoseProblem();
         record = new Record(amazing5);
         record.recordToTxtFile(resultsFileAmazing5);
+
+        print(9);
+        Reasoner wow = new ReasonerWow(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability,
+                timeout
+        );
+        wow.diagnoseProblem();
+        record = new Record(wow);
+        record.recordToTxtFile(resultsFileWow);
 
         print(777);
     }

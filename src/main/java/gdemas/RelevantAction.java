@@ -39,4 +39,8 @@ public class RelevantAction {
     public int getActionA () {
         return this.actionA;
     }
+
+    public List<RelevantAgent> getRelevantAgents () {
+        return this.relevantAgents;
+    }
 }

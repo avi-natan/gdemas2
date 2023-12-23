@@ -1,6 +1,7 @@
 package gdemas;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -15,38 +16,41 @@ import java.util.stream.Stream;
 
 import static gdemas.Utils.print;
 
-public class ReasonerAmazing5 extends Reasoner {
-
+public class ReasonerWow extends Reasoner{
     private final List<List<String>>                    agentsPredicates;
     private final List<List<List<String>>>              agentsPlanActions;
     private final List<List<List<Map<String, String>>>> agentsPlanConditions;
     private final List<List<RelevantAction>>            relevantActions;
     private final PriorityQueue<RelevantAgent>          queue;
+    private final List<PriorityQueue<RelevantAgent>>    parallelQueues;
     private RelevantAgent                               currentAgent;
+    private long                                        currentTotalRuntime;
+    private boolean                                     isFirstAgentInQueue;
     private Model                                       model;
     private long                                        xi;
     private BijectiveMap<String, BoolVar>               vmap;
     private final List<List<Diagnosis>>                 agentsDiagnoses;
     private List<GlobalDiagnosis>                       globalDiagnoses;
 
-    public ReasonerAmazing5(String   benchmarkName,
-                            String   domainName,
-                            String   problemName,
-                            File     domainFile,
-                            File     problemFile,
-                            File     agentsFile,
-                            File     combinedPlanFile,
-                            File     faultsFile,
-                            File     trajectoryFile,
-                            String   observability,
-                            long     timeout) {
+    public ReasonerWow(String   benchmarkName,
+                       String   domainName,
+                       String   problemName,
+                       File     domainFile,
+                       File     problemFile,
+                       File     agentsFile,
+                       File     combinedPlanFile,
+                       File     faultsFile,
+                       File     trajectoryFile,
+                       String   observability,
+                       long     timeout) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability, timeout);
-        this._REASONER_NAME = "amazing5";
+        this._REASONER_NAME = "wow";
         this.agentsPredicates = this.computeAgentsPredicates();
         this.agentsPlanActions = this.computeAgentsPlanActions();
         this.agentsPlanConditions = this.computeAgentsPlanConditions();
         this.relevantActions = this.computeRelevantActions();
         this.queue = this.computeRelevantAgentsActionsQueue();
+        this.parallelQueues = this.computeParallelQueues();
         List<Integer> agentsInternalActionsNumbers = this.countInternalActions();
         List<Integer> agentsExternalActionsNumbers = this.countExternalActions();
         List<Integer> agentsTotalActionsNumbers = this.countTotalActions();
@@ -157,6 +161,34 @@ public class ReasonerAmazing5 extends Reasoner {
         return queue;
     }
 
+    private List<PriorityQueue<RelevantAgent>> computeParallelQueues () {
+        List<PriorityQueue<RelevantAgent>> parallelQueues = new ArrayList<>();
+
+        List<RelevantAgent> agentsList = new ArrayList<>(this.queue);
+
+        Queue<RelevantAgent> T = new ArrayDeque<>();
+
+        while (!agentsList.isEmpty()) {
+            T.add(agentsList.remove(0));
+            PriorityQueue<RelevantAgent> R = new PriorityQueue<>(Comparator.comparing(RelevantAgent::getPossibleDiagnosesNum));
+            while (!T.isEmpty()) {
+                RelevantAgent ra = T.remove();
+                R.add(ra);
+                for (RelevantAction r : ra.getRelevantActions()) {
+                    for (RelevantAgent rat : r.getRelevantAgents()) {
+                        if (agentsList.contains(rat)) {
+                            agentsList.remove(rat);
+                            T.add(rat);
+                        }
+                    }
+                }
+            }
+            parallelQueues.add(R);
+        }
+
+        return parallelQueues;
+    }
+
     private List<Integer> countInternalActions() {
         List<Integer> agentsInternalActionsNumbers = new ArrayList<>();
         for (int a = 0; a < this._AGENTS_NUM; a++) {
@@ -223,12 +255,33 @@ public class ReasonerAmazing5 extends Reasoner {
 
     @Override
     public void diagnoseProblem() {
-        int A = -1;
-        while (!this.queue.isEmpty()) {
+        for (int PQ = 0; PQ < this.parallelQueues.size(); PQ++) {
+            diagnoseProblemForQueue(PQ);
+        }
+
+        // measurements after local diagnoses
+        this._LOCAL_DIAGNOSES_NUMBERS = this.agentsDiagnoses.stream().map(List::size).collect(Collectors.toList()).toString();
+        this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
+        this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
+
+        // combining diagnoses
+        this.combineDiagnoses();
+
+        // summary
+        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Accumulated solving time in MS: " + (this._TOTAL_RUNTIME - this._COMBINING_RUNTIME) + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME + ", Timedout: " + this._TIMEDOUT);
+    }
+
+    private void diagnoseProblemForQueue (int PQ) {
+        // initialize the total runtime for the priority queue
+        this.currentTotalRuntime = 0;
+        // set the first agent in queue indicator
+        this.isFirstAgentInQueue = true;
+
+        while (!this.parallelQueues.get(PQ).isEmpty()) {
             // get the agent from the priority queue
-            this.currentAgent = this.queue.poll();
+            this.currentAgent = this.parallelQueues.get(PQ).poll();
+            assert this.currentAgent != null;
             int qA = this.currentAgent.getQA();
-            A += 1;
 
 
             // create the model
@@ -245,28 +298,21 @@ public class ReasonerAmazing5 extends Reasoner {
             // offline part
             this.modelProblemOfflinePart(qA);
             // online part + measuring
-            this.modelProblemOnlinePart(A, qA);
+            this.modelProblemOnlinePart(qA);
 
 //            print(999);
 
             // solve problem (metrics are recorded within the problem-solving function)
-            this.solveProblem(A, qA);
+            this.solveProblem(qA);
+
+            // remove first agent in queue indicator
+            this.isFirstAgentInQueue = false;
         }
 
-        // measurements after local diagnoses
-        this._LOCAL_DIAGNOSES_NUMBERS = this.agentsDiagnoses.stream().map(List::size).collect(Collectors.toList()).toString();
-        this._LOCAL_DIAGNOSES_MIN = this.agentsDiagnoses.stream().mapToInt(List::size).min().orElse(0);
-        this._LOCAL_DIAGNOSES_MAX = this.agentsDiagnoses.stream().mapToInt(List::size).max().orElse(0);
-
-        // combining diagnoses
-        this.combineDiagnoses();
-
-        // summary
-        print(java.time.LocalTime.now() + ": " + this._REASONER_NAME + " - success. Diagnoses num: " + this._DIAGNOSES_NUM + ", Accumulated solving time in MS: " + (this._TOTAL_RUNTIME - this._COMBINING_RUNTIME) + ", Combine time in MS: " + this._COMBINING_RUNTIME + ", Total time in MS: " + this._TOTAL_RUNTIME + ", Timedout: " + this._TIMEDOUT);
-
-        // print diagnoses
-//        this.printDiagnoses();
-//        print(34);
+        // put this total runtime as the current one if it is higher than the current one
+        if (this.currentTotalRuntime > this._TOTAL_RUNTIME) {
+            this._TOTAL_RUNTIME = this.currentTotalRuntime;
+        }
     }
 
     private void modelProblemOfflinePart(int qA) {
@@ -299,12 +345,12 @@ public class ReasonerAmazing5 extends Reasoner {
         this.constraintTransitionExternalGuiltyState(qA);
     }
 
-    private void modelProblemOnlinePart(int A, int qA) {
+    private void modelProblemOnlinePart(int qA) {
         // observation
-        this.constraintObservation(A, qA);
+        this.constraintObservation(qA);
 
         // possibleHealthStates
-        this.constraintPossibleHealthStates(A, qA);
+        this.constraintPossibleHealthStates(qA);
     }
 
     private void initializeStateVariables(int qA) {
@@ -523,20 +569,20 @@ public class ReasonerAmazing5 extends Reasoner {
         return rel;
     }
 
-    private void constraintObservation(int A, int qA) {
+    private void constraintObservation(int qA) {
 //        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling possible health states...");
-        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this.currentTotalRuntime);
         if (remainingAllowedTime <= 0) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._MODELLING_AGENT_NAME.isEmpty()) {
                 this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
                 this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
                 this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
             }
-            if (A != 0) {
-                this._TOTAL_RUNTIME += 0;
+            if (!this.isFirstAgentInQueue) {
+                this.currentTotalRuntime += 0;
 //                print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + 0);
             }
             return;
@@ -561,7 +607,7 @@ public class ReasonerAmazing5 extends Reasoner {
             elapsedOnlineModelTime += Duration.between(start, end).toMillis();
             if (elapsedOnlineModelTime >= remainingAllowedTime) {
                 this._TIMEDOUT = 1;
-                if (A == 0) {
+                if (this._MODELLING_AGENT_NAME.isEmpty()) {
                     this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                     this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                     this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -576,15 +622,15 @@ public class ReasonerAmazing5 extends Reasoner {
                     this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
                     this._MODELLING_RUNTIME = elapsedOnlineModelTime;
                 }
-                if (A != 0) {
-                    this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+                if (!this.isFirstAgentInQueue) {
+                    this.currentTotalRuntime += elapsedOnlineModelTime;
 //                    print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
                 }
                 return;
             }
         }
 
-        if (A == 0) {
+        if (this._MODELLING_AGENT_NAME.isEmpty()) {
             this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
             this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
             this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -599,26 +645,26 @@ public class ReasonerAmazing5 extends Reasoner {
             this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
             this._MODELLING_RUNTIME = elapsedOnlineModelTime;
         }
-        if (A != 0) {
-            this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+        if (!this.isFirstAgentInQueue) {
+            this.currentTotalRuntime += elapsedOnlineModelTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
         }
     }
 
-    private void constraintPossibleHealthStates(int A, int qA) {
+    private void constraintPossibleHealthStates(int qA) {
 //        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "modelling possible health states...");
-        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this.currentTotalRuntime);
         if (remainingAllowedTime <= 0) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._MODELLING_AGENT_NAME.isEmpty()) {
                 this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
                 this._MODELLING_VARIABLES_NUM = this.model.getNbVars();
                 this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
             }
-            if (A != 0) {
-                this._TOTAL_RUNTIME += 0;
+            if (!this.isFirstAgentInQueue) {
+                this.currentTotalRuntime += 0;
 //                print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + 0);
             }
             return;
@@ -652,7 +698,7 @@ public class ReasonerAmazing5 extends Reasoner {
             elapsedOnlineModelTime += Duration.between(start, end).toMillis();
             if (elapsedOnlineModelTime >= remainingAllowedTime) {
                 this._TIMEDOUT = 1;
-                if (A == 0) {
+                if (this._MODELLING_AGENT_NAME.isEmpty()) {
                     this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                     this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                     this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -667,15 +713,15 @@ public class ReasonerAmazing5 extends Reasoner {
                     this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
                     this._MODELLING_RUNTIME = elapsedOnlineModelTime;
                 }
-                if (A != 0) {
-                    this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+                if (!this.isFirstAgentInQueue) {
+                    this.currentTotalRuntime += elapsedOnlineModelTime;
 //                    print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
                 }
                 return;
             }
         }
 
-        if (A == 0) {
+        if (this._MODELLING_AGENT_NAME.isEmpty()) {
             this._MODELLING_AGENT_NAME = this._AGENT_NAMES.get(qA);
             this._MODELLING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
             this._MODELLING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -690,19 +736,19 @@ public class ReasonerAmazing5 extends Reasoner {
             this._MODELLING_CONSTRAINTS_NUM = this.model.getNbCstrs();
             this._MODELLING_RUNTIME = elapsedOnlineModelTime;
         }
-        if (A != 0) {
-            this._TOTAL_RUNTIME += elapsedOnlineModelTime;
+        if (!this.isFirstAgentInQueue) {
+            this.currentTotalRuntime += elapsedOnlineModelTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": health states model time in MS: " + elapsedOnlineModelTime);
         }
     }
 
-    private void solveProblem(int A, int qA) {
+    private void solveProblem(int qA) {
 //        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + "solving...");
         // the part about if there is no time from the beginning
-        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this._TOTAL_RUNTIME);
+        long remainingAllowedTime = Math.max(0, this._TIMEOUT - this.currentTotalRuntime);
         if (remainingAllowedTime <= 0) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._SOLVING_AGENT_NAME.isEmpty()) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -731,7 +777,7 @@ public class ReasonerAmazing5 extends Reasoner {
         elapsedSolvingTime += Duration.between(start, end).toMillis();
         if (elapsedSolvingTime >= remainingAllowedTime) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._SOLVING_AGENT_NAME.isEmpty()) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -748,7 +794,7 @@ public class ReasonerAmazing5 extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
                 this._SOLVING_RUNTIME = elapsedSolvingTime;
             }
-            this._TOTAL_RUNTIME += elapsedSolvingTime;
+            this.currentTotalRuntime += elapsedSolvingTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
             return;
         }
@@ -788,7 +834,7 @@ public class ReasonerAmazing5 extends Reasoner {
         elapsedSolvingTime += cumulativeRuntimeMS;
         if (isStopMet) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._SOLVING_AGENT_NAME.isEmpty()) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -805,7 +851,7 @@ public class ReasonerAmazing5 extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
                 this._SOLVING_RUNTIME = elapsedSolvingTime;
             }
-            this._TOTAL_RUNTIME += elapsedSolvingTime;
+            this.currentTotalRuntime += elapsedSolvingTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
             return;
         }
@@ -821,7 +867,7 @@ public class ReasonerAmazing5 extends Reasoner {
         elapsedSolvingTime += Duration.between(start, end).toMillis();
         if (elapsedSolvingTime >= remainingAllowedTime) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._SOLVING_AGENT_NAME.isEmpty()) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -838,7 +884,7 @@ public class ReasonerAmazing5 extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
                 this._SOLVING_RUNTIME = elapsedSolvingTime;
             }
-            this._TOTAL_RUNTIME += elapsedSolvingTime;
+            this.currentTotalRuntime += elapsedSolvingTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
             return;
         }
@@ -854,7 +900,7 @@ public class ReasonerAmazing5 extends Reasoner {
         elapsedSolvingTime += Duration.between(start, end).toMillis();
         if (elapsedSolvingTime >= remainingAllowedTime) {
             this._TIMEDOUT = 1;
-            if (A == 0) {
+            if (this._SOLVING_AGENT_NAME.isEmpty()) {
                 this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
                 this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
                 this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -871,7 +917,7 @@ public class ReasonerAmazing5 extends Reasoner {
                 this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
                 this._SOLVING_RUNTIME = elapsedSolvingTime;
             }
-            this._TOTAL_RUNTIME += elapsedSolvingTime;
+            this.currentTotalRuntime += elapsedSolvingTime;
 //            print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Time in MS: " + elapsedSolvingTime);
             return;
         }
@@ -879,7 +925,7 @@ public class ReasonerAmazing5 extends Reasoner {
 
 
         // the part that if everything went without timeout
-        if (A == 0) {
+        if (this._SOLVING_AGENT_NAME.isEmpty()) {
             this._SOLVING_AGENT_NAME = this._AGENT_NAMES.get(qA);
             this._SOLVING_PREDICATES_NUM = this.agentsPredicates.get(qA).size();
             this._SOLVING_ACTIONS_NUM = this.countActionsNumber(this.agentsPlanActions.get(qA));
@@ -896,7 +942,7 @@ public class ReasonerAmazing5 extends Reasoner {
             this._SOLVING_DIAGNOSES_NUM = this.agentsDiagnoses.get(qA).size();
             this._SOLVING_RUNTIME = elapsedSolvingTime;
         }
-        this._TOTAL_RUNTIME += elapsedSolvingTime;
+        this.currentTotalRuntime += elapsedSolvingTime;
 //        print(java.time.LocalTime.now() + " agent " + (qA+1) + "/" + this._AGENTS_NUM + ": " + this.agentsDiagnoses.get(qA).size() + " diagnoses, Individual time in MS: " + elapsedSolvingTime + ", Cumulative time in MS: " + this._TOTAL_RUNTIME);
     }
 
@@ -947,6 +993,8 @@ public class ReasonerAmazing5 extends Reasoner {
         }
         return false;
     }
+
+
 
     private void combineDiagnoses() {
 //        print(java.time.LocalTime.now() + ": " + "combining...");
@@ -1138,9 +1186,4 @@ public class ReasonerAmazing5 extends Reasoner {
         return false;
     }
 
-    private void printDiagnoses() {
-        for (int d = 0; d < this.globalDiagnoses.size(); d++) {
-            print("Diagnosis #" + (d+1) + ":\n" + this.globalDiagnoses.get(d));
-        }
-    }
 }
