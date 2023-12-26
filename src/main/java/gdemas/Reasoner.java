@@ -15,6 +15,9 @@ public abstract class Reasoner {
     public List<List<String>>               _TRAJECTORY;
     public List<Integer>                    _OBSERVABLE_STATES;
     public long                             _TIMEOUT;
+    public List<NodeAgent>                  _NODES_AGENTS;
+    public List<NodeAction>                 _NODES_ACTIONS;
+    public List<NodePredicate>              _NODES_PREDICATES;
 
     // output members
     // controlled parameters
@@ -137,6 +140,87 @@ public abstract class Reasoner {
         this._SIZE_MAX_SUBGROUP         = 0;
         this._PERCENT_MAX_SUBGROUP      = 0;
         this._DIAGNOSES_NUM             = 0;
+
+        this.computeNodes();
+    }
+
+    private void computeNodes () {
+        // initialize node id
+        int id = 1;
+
+        // initialize the agents nodes
+        this._NODES_AGENTS = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            this._NODES_AGENTS.add(new NodeAgent(id++, a, this._AGENT_NAMES.get(a)));
+        }
+
+        // initialize the actions nodes
+        this._NODES_ACTIONS = new ArrayList<>();
+        for (int t = 0; t < this._PLAN_LENGTH; t++) {
+            for (int a = 0; a < this._AGENTS_NUM; a++) {
+                if (!this._COMBINED_PLAN_ACTIONS.get(t).get(a).equals("(nop)")) {
+                    this._NODES_ACTIONS.add(new NodeAction(id++, t, a, this._COMBINED_PLAN_ACTIONS.get(t).get(a)));
+                }
+            }
+        }
+
+        // initialize the predicates nodes
+        List<String> predicateStrings = new ArrayList<>();
+        for (int t = 0; t < this._PLAN_LENGTH; t++) {
+            for (int a = 0; a < this._AGENTS_NUM; a++) {
+                this.addPredicatesOfCondition(t, a, "pre", predicateStrings);
+                this.addPredicatesOfCondition(t, a, "eff", predicateStrings);
+            }
+        }
+        this._NODES_PREDICATES = new ArrayList<>();
+        for (String ps : predicateStrings) {
+            this._NODES_PREDICATES.add(new NodePredicate(id++, ps));
+        }
+
+        // connect the predicate nodes to the action nodes
+        for (NodePredicate pred : this._NODES_PREDICATES) {
+            for (NodeAction act : this._NODES_ACTIONS) {
+                String pString = pred.string;
+                int a = act.A;
+                int t = act.T;
+                if (this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("pre").contains(pString) || this._COMBINED_PLAN_CONDITIONS.get(t).get(a).get("eff").contains(pString)) {
+                    pred.relevantActions.add(act);
+                    act.relevantPredicates.add(pred);
+                }
+            }
+        }
+
+        // connect agents to actions in two stages:
+        // stage 1: connect agents to actions where agent.num == action.A
+        for (NodeAgent nAgent : this._NODES_AGENTS) {
+            for (NodeAction nAction : this._NODES_ACTIONS) {
+                if (nAgent.num == nAction.A) {
+                    nAgent.relevantActions.add(nAction);
+                    nAction.relevantAgents.add(nAgent);
+                }
+            }
+        }
+
+        // stage 2: connect agents 'agenti' to actions 'aj' where exists predicate 'p' relevant to 'aj'
+        // such that there exists action 'ai' that 'p' is relevant to it
+        for (NodeAgent nAgent : this._NODES_AGENTS) {
+            for (NodeAction nAction : this._NODES_ACTIONS) {
+                if (nAgent.num != nAction.A) {
+                    boolean nAction_has_p_relevant_to_nAgent = false;
+                    for (NodePredicate nPred : nAction.relevantPredicates) {
+                        for (NodeAction nnAction : nPred.relevantActions) {
+                            if (nnAction.A == nAgent.num) {
+                                nAction_has_p_relevant_to_nAgent = true;
+                            }
+                        }
+                    }
+                    if (nAction_has_p_relevant_to_nAgent) {
+                        nAgent.relevantActions.add(nAction);
+                        nAction.relevantAgents.add(nAgent);
+                    }
+                }
+            }
+        }
     }
 
     public abstract void diagnoseProblem();

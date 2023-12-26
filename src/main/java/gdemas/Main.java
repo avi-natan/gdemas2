@@ -54,22 +54,22 @@ public class Main {
         };
         long timeout = 10000;
 
-        Instant start = Instant.now();
-        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
-        Instant end = Instant.now();
-        long p5duration = Duration.between(start, end).toMinutes();
+//        Instant start = Instant.now();
+//        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
+//        Instant end = Instant.now();
+//        long p5duration = Duration.between(start, end).toMinutes();
+//
+//        // pipeline 06 - results collection
+//        start = Instant.now();
+//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+//        end = Instant.now();
+//        long p6duration = Duration.between(start, end).toMinutes();
+//
+//        print("p5 duration: " + p5duration);
+//        print("p6 duration: " + p6duration);
 
-        // pipeline 06 - results collection
-        start = Instant.now();
-        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
-        end = Instant.now();
-        long p6duration = Duration.between(start, end).toMinutes();
 
-        print("p5 duration: " + p5duration);
-        print("p6 duration: " + p6duration);
-
-
-//        manualExecutionWhileWritingAlg();
+        manualExecutionWhileWritingAlg();
 
 //        chocoLibraryTest();
     }
@@ -89,6 +89,7 @@ public class Main {
         File problemFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + ".pddl");
         File agentsFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + "-agents.txt");
         File combinedPlanFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + "-combined_plan.solution");
+        File graphFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + domainName + "-" + problemName + "-graph.gml");
         File faultsFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-faults.txt");
         File trajectoryFile = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-combined_trajectory.trajectory");
 
@@ -113,6 +114,7 @@ public class Main {
                 timeout
         );
         simple.diagnoseProblem();
+        outputNodesData(simple._NODES_AGENTS, simple._NODES_ACTIONS, simple._NODES_PREDICATES, graphFile);
         record = new Record(simple);
         record.recordToTxtFile(resultsFileSimple);
 
@@ -172,4 +174,51 @@ public class Main {
 
         print(777);
     }
+
+    private static void outputNodesData(List<NodeAgent> nodesAgents, List<NodeAction> nodesActions, List<NodePredicate> nodesPredicates, File graphFile) {
+        StringBuilder graph = new StringBuilder();
+
+        // open the graph
+        graph.append("Creator \"Avi\"\ngraph\n[\n");
+
+        // put nodes of the agents
+        for (NodeAgent n : nodesAgents) {
+            graph.append("  node\n  [\n    id ").append(n.id).append("\n    type \"agent\"").append("\n    label \"").append(n.name).append("\"\n  ]\n");
+        }
+
+        // put the nodes of the actions
+        for (NodeAction n : nodesActions) {
+            graph.append("  node\n  [\n    id ").append(n.id).append("\n    type \"action\"").append("\n    label \"").append(n.string).append("\"\n  ]\n");
+        }
+
+        // put the nodes of the predicates
+        for (NodePredicate n : nodesPredicates) {
+            graph.append("  node\n  [\n    id ").append(n.id).append("\n    type \"predicate\"").append("\n    label \"").append(n.string).append("\"\n  ]\n");
+        }
+
+        // put the edges between the agents and the actions
+        for (NodeAgent nAg : nodesAgents) {
+            for (NodeAction nAc : nAg.relevantActions) {
+                graph.append("  edge\n  [\n    source ").append(nAg.id).append("\n    target ").append(nAc.id).append("\n    value 1\n  ]\n");
+            }
+        }
+
+        // put the edges between the actions and the predicates
+        for (NodeAction nAc : nodesActions) {
+            for (NodePredicate nPr : nAc.relevantPredicates) {
+                graph.append("  edge\n  [\n    source ").append(nAc.id).append("\n    target ").append(nPr.id).append("\n    value 1\n  ]\n");
+            }
+        }
+
+        // close the graph
+        graph.append("]\n");
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(graphFile))) {
+            writer.write(graph.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception as needed
+        }
+    }
+
 }
