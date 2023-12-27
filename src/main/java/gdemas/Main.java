@@ -78,7 +78,7 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-4-0";
+        String problemName = "probLOGISTICS-14-0";
         int faultsNum = 2;
         int repetitionNum = 1;
         String observability = "1p";
@@ -97,6 +97,7 @@ public class Main {
         File resultsFileSmart = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-smart-results.txt");
         File resultsFileAmazing5 = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-amazing5-results.txt");
         File resultsFileWow = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-wow-results.txt");
+        File resultsFileSuperb = new File("benchmarks - sandbox/" + benchmarkName + "/" + domainName + "/" + problemName + "/" + faultsNum + "/" + domainName + "-" + problemName + "-f[" + faultsNum + "]-r[" + repetitionNum + "]-" + observability + "-superb-results.txt");
 
         Record record;
 
@@ -171,6 +172,24 @@ public class Main {
         wow.diagnoseProblem();
         record = new Record(wow);
         record.recordToTxtFile(resultsFileWow);
+
+        print(9);
+        Reasoner superb = new ReasonerSuperb(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability,
+                timeout
+        );
+        superb.diagnoseProblem();
+        record = new Record(superb);
+        record.recordToTxtFile(resultsFileSuperb);
 
         print(777);
     }
