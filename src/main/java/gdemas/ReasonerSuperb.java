@@ -66,6 +66,11 @@ public class ReasonerSuperb extends Reasoner {
     }
 
     private List<List<Integer>> computeDiagnosersAgentNumbers() {
+//        return agentsNumbersOddEven();
+        return agentsNumbersAtLeastOneSharedAction();
+    }
+
+    private List<List<Integer>> agentsNumbersOddEven() {
         List<List<Integer>> diagnosersAgentNumbers = new ArrayList<>();
         List<Integer> odd = new ArrayList<>();
         List<Integer> even = new ArrayList<>();
@@ -78,6 +83,36 @@ public class ReasonerSuperb extends Reasoner {
         }
         diagnosersAgentNumbers.add(even);
         diagnosersAgentNumbers.add(odd);
+        return diagnosersAgentNumbers;
+    }
+
+    private List<List<Integer>> agentsNumbersAtLeastOneSharedAction() {
+        List<List<Integer>> diagnosersAgentNumbers = new ArrayList<>();
+
+        // init the queue of mergeLists
+        List<Integer> Q = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            Q.add(a);
+        }
+
+        // divide according to rule
+        while (!Q.isEmpty()) {
+            int a = Q.remove(0);
+            List<Integer> mla = new ArrayList<>();
+            mla.add(a);
+            NodeAgent na = this._NODES_AGENTS.get(a);
+            for (NodeAction nac : na.relevantActions) {
+                for (NodeAgent na2 : nac.relevantAgents) {
+                    Integer na2num = na2.num;
+                    if (Q.contains(na2num)) {
+                        Q.remove(na2num);
+                        mla.add(na2num);
+                    }
+                }
+            }
+            diagnosersAgentNumbers.add(mla);
+        }
+
         return diagnosersAgentNumbers;
     }
 

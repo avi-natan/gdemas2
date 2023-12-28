@@ -41,35 +41,35 @@ public class Main {
         String p05executionMode = "new";
         String[] observabilities = {
                 "1p",
-                "5p",
+//                "5p",
                 "10p",
-                "12p",
-                "15p",
-                "17p",
+//                "12p",
+//                "15p",
+//                "17p",
                 "20p",
-                "25p",
-                "50p",
-                "75p",
+//                "25p",
+//                "50p",
+//                "75p",
                 "99p"
         };
         long timeout = 10000;
 
-//        Instant start = Instant.now();
-//        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
-//        Instant end = Instant.now();
-//        long p5duration = Duration.between(start, end).toMinutes();
-//
-//        // pipeline 06 - results collection
-//        start = Instant.now();
-//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
-//        end = Instant.now();
-//        long p6duration = Duration.between(start, end).toMinutes();
-//
-//        print("p5 duration: " + p5duration);
-//        print("p6 duration: " + p6duration);
+        Instant start = Instant.now();
+        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
+        Instant end = Instant.now();
+        long p5duration = Duration.between(start, end).toMinutes();
+
+        // pipeline 06 - results collection
+        start = Instant.now();
+        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+        end = Instant.now();
+        long p6duration = Duration.between(start, end).toMinutes();
+
+        print("p5 duration: " + p5duration);
+        print("p6 duration: " + p6duration);
 
 
-        manualExecutionWhileWritingAlg();
+//        manualExecutionWhileWritingAlg();
 
 //        chocoLibraryTest();
     }
@@ -101,7 +101,26 @@ public class Main {
 
         Record record;
 
+        print("initialization simple just to hit the model on the head so it focuses");
         Reasoner simple = new ReasonerSimple(
+                benchmarkName,
+                domainName,
+                problemName,
+                domainFile,
+                problemFile,
+                agentsFile,
+                combinedPlanFile,
+                faultsFile,
+                trajectoryFile,
+                observability,
+                timeout
+        );
+        simple.diagnoseProblem();
+        outputNodesData(simple._NODES_AGENTS, simple._NODES_ACTIONS, simple._NODES_PREDICATES, graphFile);
+        record = new Record(simple);
+        record.recordToTxtFile(resultsFileSimple);
+
+        simple = new ReasonerSimple(
                 benchmarkName,
                 domainName,
                 problemName,
