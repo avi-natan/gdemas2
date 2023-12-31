@@ -54,22 +54,22 @@ public class Main {
         };
         long timeout = 10000;
 
-        Instant start = Instant.now();
-        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
-        Instant end = Instant.now();
-        long p5duration = Duration.between(start, end).toMinutes();
+//        Instant start = Instant.now();
+//        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
+//        Instant end = Instant.now();
+//        long p5duration = Duration.between(start, end).toMinutes();
+//
+//        // pipeline 06 - results collection
+//        start = Instant.now();
+//        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
+//        end = Instant.now();
+//        long p6duration = Duration.between(start, end).toMinutes();
+//
+//        print(java.time.LocalTime.now() + ": p5 duration: " + p5duration);
+//        print(java.time.LocalTime.now() + ": p6 duration: " + p6duration);
 
-        // pipeline 06 - results collection
-        start = Instant.now();
-        P06ResultsCollector.execute(faultNumbers, repeatNumber, observabilities);
-        end = Instant.now();
-        long p6duration = Duration.between(start, end).toMinutes();
 
-        print("p5 duration: " + p5duration);
-        print("p6 duration: " + p6duration);
-
-
-//        manualExecutionWhileWritingAlg();
+        manualExecutionWhileWritingAlg();
 
 //        chocoLibraryTest();
     }
@@ -78,7 +78,7 @@ public class Main {
         // parameters for easier changing
         String benchmarkName = "mastrips";
         String domainName = "logistics00";
-        String problemName = "probLOGISTICS-14-0";
+        String problemName = "probLOGISTICS-4-0";
         int faultsNum = 2;
         int repetitionNum = 1;
         String observability = "1p";

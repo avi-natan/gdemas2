@@ -67,7 +67,8 @@ public class ReasonerSuperb extends Reasoner {
 
     private List<List<Integer>> computeDiagnosersAgentNumbers() {
 //        return agentsNumbersOddEven();
-        return agentsNumbersAtLeastOneSharedAction();
+//        return agentsNumbersAtLeastOneSharedAction();
+        return agentsNumbersMaximalMinimumConstraintStrength();
     }
 
     private List<List<Integer>> agentsNumbersOddEven() {
@@ -114,6 +115,164 @@ public class ReasonerSuperb extends Reasoner {
         }
 
         return diagnosersAgentNumbers;
+    }
+
+    private List<List<Integer>> agentsNumbersMaximalMinimumConstraintStrength() {
+        // init agents numbers
+        List<Integer> agentNumbers = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            agentNumbers.add(a);
+        }
+
+        //  generate partitions
+        List<List<List<Integer>>> partitions = generatePartitions(agentNumbers);
+
+        // calculate minimal constraint strengths
+        List<Double> minimalConstraintStrengths = new ArrayList<>();
+        for (List<List<Integer>> partition : partitions) {
+            double minConstStr = minimalConstraintStrength(partition);
+            minimalConstraintStrengths.add(minConstStr);
+        }
+
+        // get the maximal minimal constraint strength
+        int bestPartitionIndex = 0;
+        double bestPartitionCS = minimalConstraintStrengths.get(bestPartitionIndex);
+        for (int i = 1; i < partitions.size(); i++) {
+            if (minimalConstraintStrengths.get(i) > bestPartitionCS) {
+                bestPartitionIndex = i;
+                bestPartitionCS = minimalConstraintStrengths.get(i);
+            }
+        }
+
+        List<List<Integer>> diagnosersAgentNumbers = partitions.get(bestPartitionIndex);
+
+        return diagnosersAgentNumbers;
+    }
+
+    private static List<List<List<Integer>>> generatePartitions(List<Integer> inputSet) {
+        List<List<List<Integer>>> res = new ArrayList<>();
+        if (inputSet.isEmpty()) {
+            List<List<Integer>> empty = new ArrayList<>();
+            res.add(empty);
+            return res;
+        }
+        // Note that this algorithm only works if inputSet.size() < 31
+        // since you overflow int space beyond that. This is true even
+        // if you use Math.pow and cast back to int. The original
+        // Python code does not have this limitation because Python
+        // will implicitly promote to a long, which in Python terms is
+        // an arbitrary precision integer similar to Java's BigInteger.
+        int limit = 1 << (inputSet.size() - 1);
+        // Note the separate variable to avoid resetting
+        // the loop variable on each iteration.
+        for (int j = 0; j < limit; ++j) {
+            List<List<Integer>> parts = new ArrayList<>();
+            List<Integer> part1 = new ArrayList<>();
+            List<Integer> part2 = new ArrayList<>();
+            parts.add(part1);
+            parts.add(part2);
+            int i = j;
+            for (Integer item : inputSet) {
+                parts.get(i&1).add(item);
+                i >>= 1;
+            }
+            for (List<List<Integer>> b : generatePartitions(part2)) {
+                List<List<Integer>> holder = new ArrayList<>();
+                holder.add(part1);
+                holder.addAll(b);
+                res.add(holder);
+            }
+        }
+        return res;
+    }
+
+    private double minimalConstraintStrength(List<List<Integer>> partition) {
+        List<Integer> constraintStrengths = new ArrayList<>();
+        for (List<Integer> set : partition) {
+            int setCS = 0;
+            List<NodeAction> setActions = new ArrayList<>();
+            for (Integer A : set) {
+                NodeAgent nA = this._NODES_AGENTS.get(A);
+                for (NodeAction nAac : nA.relevantActions) {
+                    if (!setActions.contains(nAac)) {
+                        setActions.add(nAac);
+                    }
+                }
+            }
+            for (NodeAction sAct : setActions) {
+                if (set.contains(sAct.A)) {
+                    // action is internal
+                    Map<String, String> m  = this._COMBINED_PLAN_CONDITIONS.get(sAct.T).get(sAct.A);
+                    String preconditions = m.get("pre");
+                    String effects = m.get("eff");
+                    int predicatesInPre = 0;
+                    for (NodePredicate p : sAct.relevantPredicates) {
+                        if (preconditions.contains(p.string)) {
+                            predicatesInPre += 1;
+                        }
+                    }
+                    int predicatesInEff = 0;
+                    for (NodePredicate p : sAct.relevantPredicates) {
+                        if (effects.contains(p.string)) {
+                            predicatesInEff += 1;
+                        }
+                    }
+                    setCS = setCS + predicatesInPre + predicatesInEff;
+                } else {
+                    // action is external
+                    Map<String, String> m  = this._COMBINED_PLAN_CONDITIONS.get(sAct.T).get(sAct.A);
+                    String effects = m.get("eff");
+                    int relevantPredicatesInEff = 0;
+                    for (NodePredicate p : sAct.relevantPredicates) {
+                        if (effects.contains(p.string) && predicateRelevantToSet(p, set)) {
+                            relevantPredicatesInEff += 1;
+                        }
+                    }
+                    setCS = setCS + relevantPredicatesInEff;
+                }
+            }
+            constraintStrengths.add(setCS);
+        }
+        List<Integer> numbersOfVars = new ArrayList<>();
+        for (List<Integer> set : partition) {
+            int varsNum = 0;
+            List<NodeAction> setActions = new ArrayList<>();
+            for (Integer A : set) {
+                NodeAgent nA = this._NODES_AGENTS.get(A);
+                for (NodeAction nAac : nA.relevantActions) {
+                    if (!setActions.contains(nAac)) {
+                        setActions.add(nAac);
+                    }
+                }
+            }
+            for (NodeAction sAct : setActions) {
+                if (set.contains(sAct.A)) {
+                    varsNum = varsNum + 3;
+                } else {
+                    varsNum = varsNum + 2;
+                }
+            }
+            numbersOfVars.add(varsNum);
+        }
+        List<Double> ratios = new ArrayList<>();
+        for (int i = 0; i < constraintStrengths.size(); i++) {
+            ratios.add(constraintStrengths.get(i) * 1.0 / numbersOfVars.get(i));
+        }
+        double minConstStr = ratios.stream().mapToDouble(Double::doubleValue).min().orElse(0);
+        return minConstStr;
+    }
+
+    private boolean predicateRelevantToSet(NodePredicate p, List<Integer> set) {
+        for (int t = 0; t < this._PLAN_LENGTH; t++) {
+            for (Integer s : set) {
+                String pre = this._COMBINED_PLAN_CONDITIONS.get(t).get(s).get("pre");
+                String eff = this._COMBINED_PLAN_CONDITIONS.get(t).get(s).get("eff");
+                if (pre.contains(p.string) || eff.contains(p.string)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private List<List<String>> computeDiagnosersPredicates() {
