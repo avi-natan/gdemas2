@@ -17,7 +17,7 @@ import static gdemas.Utils.print;
 
 public class ReasonerSuperb extends Reasoner {
 
-    private final List<List<Integer>>                   diagnosersAgentNumbers;
+    public final List<List<Integer>>                    diagnosersAgentNumbers;
     private final List<List<String>>                    diagnosersPredicates;
     private final List<List<List<String>>>              diagnosersPlanActions;
     private final List<List<List<Map<String, String>>>> diagnosersPlanConditions;
@@ -37,10 +37,15 @@ public class ReasonerSuperb extends Reasoner {
                           File       faultsFile,
                           File       trajectoryFile,
                           String     observability,
-                          long       timeout) {
+                          long       timeout,
+                          List<List<Integer>> diagnosersAgentNumbers) {
         super(benchmarkName, domainName, problemName, domainFile, problemFile, agentsFile, combinedPlanFile, faultsFile, trajectoryFile, observability, timeout);
         this._REASONER_NAME = "superb";
-        this.diagnosersAgentNumbers = this.computeDiagnosersAgentNumbers();
+        if (diagnosersAgentNumbers != null) {
+            this.diagnosersAgentNumbers = diagnosersAgentNumbers;
+        } else {
+            this.diagnosersAgentNumbers = this.computeDiagnosersAgentNumbers();
+        }
         this.diagnosersPredicates = this.computeDiagnosersPredicates();
         this.diagnosersPlanActions = this.computeDiagnosersPlanActions();
         this.diagnosersPlanConditions = this.computeDiagnosersPlanConditions();
@@ -68,7 +73,143 @@ public class ReasonerSuperb extends Reasoner {
     private List<List<Integer>> computeDiagnosersAgentNumbers() {
 //        return agentsNumbersOddEven();
 //        return agentsNumbersAtLeastOneSharedAction();
-        return agentsNumbersMaximalMinimumConstraintStrength();
+//        return agentsNumbersMaximalMinimumConstraintStrength();
+        return agentsNumbersAveragePathLength();
+    }
+
+    private List<List<Integer>> agentsNumbersAveragePathLength() {
+        // init agents numbers
+        List<Integer> agentNumbers = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            agentNumbers.add(a);
+        }
+
+        //  generate partitions
+        List<List<List<Integer>>> partitions = generatePartitions(agentNumbers);
+
+        // calculate the scores of the partitions
+        List<Double> partitionScores = new ArrayList<>();
+        for (List<List<Integer>> partition : partitions) {
+            double maxAvgPathLen = calcScore(partition);
+            partitionScores.add(maxAvgPathLen);
+        }
+
+        // get the index and score of the partition with the best score
+        int bestPartitionIndex = 0;
+        double bestPartitionAPL = partitionScores.get(bestPartitionIndex);
+        for (int i = 1; i < partitions.size(); i++) {
+            if (partitionScores.get(i) < bestPartitionAPL) {
+                bestPartitionIndex = i;
+                bestPartitionAPL = partitionScores.get(i);
+            }
+        }
+
+        List<List<Integer>> diagnosersAgentNumbers = partitions.get(bestPartitionIndex);
+
+        return diagnosersAgentNumbers;
+    }
+
+    private double calcScore(List<List<Integer>> partition) {
+        List<Double> setScores = new ArrayList<>();
+        for (List<Integer> set : partition) {
+            double score = calcSetScore(set);
+            setScores.add(score);
+        }
+        return setScores.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+    }
+
+    private double calcSetScore(List<Integer> set) {
+        // calculate the predicates relevant to the agents in the set
+        List<String> setRelevantPredicates = new ArrayList<>();
+        for (Integer a : set) {
+            for (int t = 0; t < this._PLAN_LENGTH; t++) {
+                this.addPredicatesOfCondition(t, a, "pre", setRelevantPredicates);
+                this.addPredicatesOfCondition(t, a, "eff", setRelevantPredicates);
+            }
+        }
+
+        List<Node> nodes = new ArrayList<>();
+        int graphID = 0;
+        int setActionsNum = 0;
+        // create the action nodes of the graph and count them
+        for (NodeAction nAct : this._NODES_ACTIONS) {
+            for (String p : setRelevantPredicates) {
+                if (this._COMBINED_PLAN_CONDITIONS.get(nAct.T).get(nAct.A).get("pre").contains(p) || this._COMBINED_PLAN_CONDITIONS.get(nAct.T).get(nAct.A).get("eff").contains(p)) {
+                    nodes.add(new Node(graphID++, nAct.id, nAct.string));
+                    if (set.contains(nAct.A)) {
+                        setActionsNum += 3;
+                    } else {
+                        setActionsNum += 2;
+//                    print("id " + nAct.id)
+                    };
+                    break;
+                }
+            }
+        }
+        // create the predicate nodes of the graph
+        for (NodePredicate nPred : this._NODES_PREDICATES) {
+            for (String p : setRelevantPredicates) {
+                if (nPred.string.equals(p)) {
+                    nodes.add((new Node(graphID++, nPred.id, nPred.string)));
+//                    print("id " + nPred.id);
+                    break;
+                }
+            }
+        }
+
+//        print(9);
+
+        // connect the nodes (go to the relevant predicates and find the action node numbers)
+        for (NodePredicate nPred : this._NODES_PREDICATES) {
+            if (setRelevantPredicates.contains(nPred.string)) {
+                Node NPred = null;
+                for (Node n : nodes) {
+                    if (n.id == nPred.id) {
+                        NPred = n;
+                    }
+                }
+                if (NPred != null) {
+//                    print(nPred.string + ", " + nPred.id + "; " + NPred.id);
+                    for (NodeAction nAct : nPred.relevantActions) {
+                        Node NAct = null;
+                        for (Node n : nodes) {
+                            if (n.id == nAct.id) {
+                                NAct = n;
+                            }
+                        }
+                        if (NAct != null) {
+//                            print(nAct.string + ", " + nAct.id + "; " + NAct.id);
+                            NPred.neighbors.add(NAct);
+                            NAct.neighbors.add(NPred);
+                        }
+                    }
+                }
+            }
+        }
+
+//        print(9);
+
+        // finding shortest paths in the graph
+        Graph graph = new Graph(nodes.size());
+        for (Node n : nodes) {
+            for (Node adj : n.neighbors) {
+                graph.addEdge(n.graphID, adj.graphID, 1);
+            }
+        }
+
+//        graph.printShortestPaths();
+
+        graph.floydWarshall();
+
+//        graph.printShortestPaths();
+
+//        print(graph.getMinPathLen());
+//        print(graph.getMaxPathLen());
+//        print(graph.getAvgParthLen());
+
+//        print(9);
+
+        return graph.getAvgParthLen() / setActionsNum;
     }
 
     private List<List<Integer>> agentsNumbersOddEven() {

@@ -204,7 +204,8 @@ public class Main {
                 faultsFile,
                 trajectoryFile,
                 observability,
-                timeout
+                timeout,
+                null
         );
         superb.diagnoseProblem();
         record = new Record(superb);

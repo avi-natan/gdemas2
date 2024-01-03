@@ -23,7 +23,7 @@ public class NodeAction {
 
     @Override
     public String toString() {
-        return this.T + ", " + this.A + ", " + this.string;
+        return this.id + ", " + this.T + ", " + this.A + ", " + this.string;
     }
 
 }

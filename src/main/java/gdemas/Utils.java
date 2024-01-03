@@ -18,6 +18,10 @@ public class Utils {
         System.out.println(string);
     }
 
+    public static void print(double string) {
+        System.out.println(string);
+    }
+
     public static File[] listDirectories(File parentDirectory) {
         File[] dirs = Objects.requireNonNullElseGet(parentDirectory.listFiles(File::isDirectory), () -> new File[]{});
         Arrays.sort(dirs, new WindowsComparator());

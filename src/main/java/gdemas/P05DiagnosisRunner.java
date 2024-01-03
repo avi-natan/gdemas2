@@ -1,6 +1,7 @@
 package gdemas;
 
 import java.io.*;
+import java.util.List;
 import java.util.Objects;
 
 import static gdemas.Utils.*;
@@ -64,6 +65,8 @@ public class P05DiagnosisRunner {
                 File planFile06 = new File(problemFolder06, domainFolder06.getName() + "-" + problemFolder06.getName() + "-plan.txt");
                 copyFileIfDoesntExist(planFile, planFile06);
                 print(java.time.LocalTime.now() + ": " + planFile06.getAbsolutePath());
+
+                List<List<Integer>> diagnosersAgentNumbers = null;
 
                 File[] faultFolders = listDirectories(problemFolder);
                 for (File faultFolder: faultFolders) {
@@ -165,7 +168,10 @@ public class P05DiagnosisRunner {
                                         case "superb":
                                             while (attempt < maxAttempts) {
                                                 try {
-                                                    reasoner = new ReasonerSuperb("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability, timeout);
+                                                    reasoner = new ReasonerSuperb("mastrips", domainFolder06.getName(), problemFolder06.getName(), domainFile06, problemFile06, agentsFile06, combinedPlanFile06, faultFile06, trajectoryFile06, observability, timeout, diagnosersAgentNumbers);
+                                                    if (diagnosersAgentNumbers == null) {
+                                                        diagnosersAgentNumbers = ((ReasonerSuperb) reasoner).diagnosersAgentNumbers;
+                                                    }
                                                     reasoner.diagnoseProblem();
                                                     success = true;
                                                     break;
