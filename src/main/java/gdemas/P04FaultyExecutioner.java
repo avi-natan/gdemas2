@@ -62,6 +62,10 @@ public class P04FaultyExecutioner {
                 File planFile05 = new File(problemFolder05, domainFolder05.getName() + "-" + problemFolder05.getName() + "-plan.txt");
                 copyFileIfDoesntExist(planFile, planFile05);
                 print(planFile05.getAbsolutePath());
+                File healthyTrajectoryFile = new File(problemFolder, domainFolder.getName() + "-" + problemFolder.getName() + "-healthy_trajectory.trajectory");
+                File healthyTrajectoryFile05 = new File(problemFolder05, domainFolder05.getName() + "-" + problemFolder05.getName() + "-healthy_trajectory.trajectory");
+                copyFileIfDoesntExist(healthyTrajectoryFile, healthyTrajectoryFile05);
+                print(healthyTrajectoryFile.getAbsolutePath());
 
                 Domain domain = Parser.parseDomain(domainFile05);
                 Problem problem = Parser.parseProblem(problemFile05);
@@ -120,7 +124,7 @@ public class P04FaultyExecutioner {
                                     String init = String.join(") (", fe.trajectory.get(0));
                                     str.append(init).append("))");
                                     for (int t = 0; t < combinedPlanActions.size(); t++){
-                                        String jointAction = "(" + String.join(") (", combinedPlanActions.get(t)) + ")";
+                                        String jointAction = String.join(" ", combinedPlanActions.get(t));
                                         jointAction = jointAction.replaceAll("\\(nop", "(nop ");
                                         jointAction = "(operators: " + jointAction + ")";
                                         String nextState = "(:state  (" + String.join(") (", fe.trajectory.get(t+1)) + "))";
@@ -182,7 +186,7 @@ public class P04FaultyExecutioner {
             // go over the agent actions
             for (int a = 0; a < agentNames.size(); a++) {
                 // if it's not a nop action
-                if (!combinedPlanActions.get(t).get(a).equals("nop")) {
+                if (!combinedPlanActions.get(t).get(a).equals("(nop)")) {
 //                    print("\n=================> attempt to apply action " + t + "," + a +" (" + combinedPlanActions.get(t).get(a) + ")");
                     // if the action can be performed (the preconditions are valid)
                     if (validPreconditions(combinedPlanConditions.get(t).get(a).get("pre"), newState)) {
@@ -237,7 +241,9 @@ public class P04FaultyExecutioner {
             if (e.contains("not ")) {
                 state.remove(e.substring(5, e.length()-1));
             } else {
-                state.add(e);
+                if (!state.contains(e)) {
+                    state.add(e);
+                }
             }
         }
     }

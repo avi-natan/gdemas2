@@ -49,12 +49,7 @@ public class P06ResultsCollector {
                                             "-f[" + f + "]" + "-r[" + r + "]" + "-" + o + "-superb-results.txt");
                             print(resultSimple.getAbsolutePath());
 
-                            String comparable;
-                            if (resultSimple.exists() && resultSmart.exists() && resultAmazing5.exists() && resultWow.exists() && resultSuperb.exists()) {
-                                comparable = "yes";
-                            } else {
-                                comparable = "no";
-                            }
+                            String comparable = checkComparable(new File[] {resultSimple, resultSmart, resultAmazing5, resultWow, resultSuperb});
 
                             if (resultSimple.exists()) {
                                 records.add(createSuccessfulRecord(resultSimple, comparable));
@@ -106,6 +101,27 @@ public class P06ResultsCollector {
 
         saveRecordsToExcel(records, outputFile);
         print(9);
+    }
+
+    private static String checkComparable(File[] resultFiles) {
+        boolean comparable = true;
+        for (File resultFile : resultFiles) {
+            if (!resultFile.exists()) {
+                comparable = false;
+            } else {
+                String resultString = Parser.readFromFile(resultFile);
+                String timeOutEntry = resultString.split("\r\n")[27];
+                String timeoutValue = timeOutEntry.split(":")[1];
+                if (timeoutValue.equals("1")) {
+                    comparable = false;
+                }
+            }
+        }
+        if (comparable) {
+            return "yes";
+        } else {
+            return "no";
+        }
     }
 
     private static Record2 createSuccessfulRecord(File resultsFile, String comparable) {

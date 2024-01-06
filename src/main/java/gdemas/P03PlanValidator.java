@@ -30,12 +30,14 @@ public class P03PlanValidator {
                 print(agentsFile.getAbsolutePath());
                 File combinedPlanFile = new File(problemFolder, domainFolder.getName() + "-" + problemFolder.getName() + "-combined_plan.solution");
                 print(combinedPlanFile.getAbsolutePath());
+                File healthyTrajectoryFile = new File(problemFolder, domainFolder.getName() + "-" + problemFolder.getName() + "-healthy_trajectory.trajectory");
+                print(healthyTrajectoryFile.getAbsolutePath());
 
                 if (combinedPlanFile.exists()) {
                     report.attempts += 1;
                     print("attempt");
 
-                    boolean valid = validateCombinedPlan(domainFile, problemFile, combinedPlanFile);
+                    boolean valid = validateCombinedPlan(domainFile, problemFile, combinedPlanFile, healthyTrajectoryFile);
 
                     if (valid) {
                         report.success += 1;
@@ -63,17 +65,20 @@ public class P03PlanValidator {
         }
     }
 
-    private static boolean validateCombinedPlan(File domainFile, File problemFile, File combinedPlanFile) {
+    private static boolean validateCombinedPlan(File domainFile, File problemFile, File combinedPlanFile, File healthyTrajectoryFile) {
         Domain domain = Parser.parseDomain(domainFile);
         Problem problem = Parser.parseProblem(problemFile);
         List<List<String>> combinedPlan = Parser.parseCombinedPlan(combinedPlanFile);
 
         List<List<Map<String, String>>> conditions = computeConditions(combinedPlan, domain);
+
+        List<List<String>> states = new ArrayList<>();
         List<String> state = new ArrayList<>(problem.init);
+        states.add(new ArrayList<>(state));
 
         for (int t = 0; t < combinedPlan.size(); t++) {
             for (int a = 0; a < combinedPlan.get(t).size(); a++) {
-                if (!combinedPlan.get(t).get(a).equals("nop")) {
+                if (!combinedPlan.get(t).get(a).equals("(nop)")) {
                     if (preconditionsMet(state, conditions.get(t).get(a).get("pre"))) {
                         applyActionEffectsToState(state, conditions.get(t).get(a).get("eff"));
                     } else {
@@ -82,9 +87,33 @@ public class P03PlanValidator {
                     }
                 }
             }
+            states.add(new ArrayList<>(state));
         }
 
-        return goalReached(state, problem.goal);
+        boolean valid = goalReached(state, problem.goal);
+
+        if (valid) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(healthyTrajectoryFile))) {
+                // Create the trajectory string
+                StringBuilder str = new StringBuilder("((:init  ");
+                String init = String.join(" ", states.get(0));
+                str.append(init).append(")");
+                for (int t = 0; t < combinedPlan.size(); t++){
+                    String jointAction = String.join(" ", combinedPlan.get(t));
+                    jointAction = jointAction.replaceAll("\\(nop", "(nop ");
+                    jointAction = "(operators: " + jointAction + ")";
+                    String nextState = "(:state  " + String.join(" ", states.get(t+1)) + ")";
+                    str.append("\r\n").append(jointAction).append("\r\n").append(nextState);
+                }
+                str.append("\r\n)");
+                writer.write(str.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle the exception as needed
+            }
+        }
+
+        return valid;
     }
 
     private static boolean goalReached(List<String> state, List<String> goal) {
@@ -103,7 +132,9 @@ public class P03PlanValidator {
                 String predicate = s.substring(5, s.length()-1);
                 state.remove(predicate);
             } else {
-                state.add(s);
+                if (!state.contains(s)) {
+                    state.add(s);
+                }
             }
         }
     }
@@ -123,14 +154,14 @@ public class P03PlanValidator {
         for (List<String> strings : combinedPlan) {
             List<Map<String, String>> jointConditions = new ArrayList<>();
             for (String p : strings) {
-                String[] signature = p.split(" ");
-                String name = signature[0];
-                if (name.equals("nop")) {
+                if (p.equals("(nop)")) {
                     Map<String, String> c = new HashMap<>();
                     c.put("pre", "");
                     c.put("eff", "");
                     jointConditions.add(c);
                 } else {
+                    String[] signature = p.substring(1, p.length()-1).split(" ");
+                    String name = signature[0];
                     String[] arguments = Arrays.copyOfRange(signature, 1, signature.length);
                     String[] parameters = domain.actions.get(name).get("parameters").replaceAll("\\s+-\\s+\\S+", "").split(" ");
                     String preconditions = domain.actions.get(name).get("preconditions");
