@@ -74,7 +74,120 @@ public class ReasonerSuperb extends Reasoner {
 //        return agentsNumbersOddEven();
 //        return agentsNumbersAtLeastOneSharedAction();
 //        return agentsNumbersMaximalMinimumConstraintStrength();
-        return agentsNumbersAveragePathLength();
+//        return agentsNumbersAveragePathLength();
+        return agentsNumbersMergeIfAllOtherActionsAreKnown();
+    }
+
+    private List<List<Integer>> agentsNumbersMergeIfAllOtherActionsAreKnown() {
+        // initiate the list of reasoners' agent numbers
+        List<List<Integer>> diagnosersAgentNumbers = new ArrayList<>();
+
+        // generate a list of number of internal actions
+        List<Integer> internalActionNumbers = new ArrayList<>();
+        for (NodeAgent na : this._NODES_AGENTS) {
+            int naActionsNumber = 0;
+            for (NodeAction nAct : na.relevantActions) {
+                if (nAct.A == na.num) {
+                    naActionsNumber += 1;
+                }
+            }
+            internalActionNumbers.add(naActionsNumber);
+        }
+
+        // for every agent generate a map of other agents, for which it says how many actions the currentAgent knows
+        List<Map<Integer, Integer>> knownExternalActions = new ArrayList<>();
+        for (int a = 0; a < this._AGENT_NAMES.size(); a++) {
+            Map<Integer, Integer> agentKnownExternalActions = new HashMap<>();
+            for (int aa = 0; aa < this._AGENT_NAMES.size(); aa++) {
+                if (aa != a) {
+                    int agentKnownExternalActionsCount = 0;
+                    for (NodeAction nAct : this._NODES_AGENTS.get(a).relevantActions) {
+                        if (nAct.A == aa) {
+                            agentKnownExternalActionsCount += 1;
+                        }
+                    }
+                    agentKnownExternalActions.put(aa, agentKnownExternalActionsCount);
+                }
+            }
+            knownExternalActions.add(agentKnownExternalActions);
+        }
+
+        // initiate the merge dataset
+        List<Map<String, List<Integer>>> mergeDataset = new ArrayList<>();
+        for (int a = 0; a < this._AGENTS_NUM; a++) {
+            Map<String, List<Integer>> m = new HashMap<>();
+            List<Integer> agents = new ArrayList<>();
+            agents.add(a);
+            List<Integer> shouldHave = new ArrayList<>();
+            shouldHave.add(a);
+            for (Integer aa : knownExternalActions.get(a).keySet()) {
+                int knownA_AA = knownExternalActions.get(a).get(aa);
+                if (knownA_AA != 0 && knownA_AA == internalActionNumbers.get(aa)) {
+                    shouldHave.add(aa);
+                }
+            }
+            m.put("agents", agents);
+            m.put("shouldHave", shouldHave);
+            mergeDataset.add(m);
+        }
+
+        int nextInd = nextIndexInNeedOfMerge(mergeDataset);
+        while(nextInd != -1) {
+            print("merge needed");
+            List<Integer> shouldHaveCopy = new ArrayList<>(mergeDataset.get(nextInd).get("shouldHave"));
+            for (Integer a : shouldHaveCopy) {
+                if (!mergeDataset.get(nextInd).get("agents").contains(a)) {
+                    int havingInd = -1;
+                    for (int i = 0; i < mergeDataset.size(); i++) {
+                        if (mergeDataset.get(i) != null) {
+                            if (mergeDataset.get(i).get("agents").contains(a)) {
+                                havingInd = i;
+                                break;
+                            }
+                        }
+                    }
+                    Map<String, List<Integer>> m = mergeDataset.get(havingInd);
+                    mergeDataset.set(havingInd, null);
+                    for (Integer a2 : m.get("agents")) {
+                        if (!mergeDataset.get(nextInd).get("agents").contains(a2)) {
+                            mergeDataset.get(nextInd).get("agents").add(a2);
+                        }
+                    }
+                    for (Integer a2 : m.get("shouldHave")) {
+                        if (!mergeDataset.get(nextInd).get("shouldHave").contains(a2)) {
+                            mergeDataset.get(nextInd).get("shouldHave").add(a2);
+                        }
+                    }
+                }
+            }
+            nextInd = nextIndexInNeedOfMerge(mergeDataset);
+        }
+
+        for (int i = 0; i < mergeDataset.size(); i++) {
+            if (mergeDataset.get(i) != null) {
+                List<Integer> agentsInMap = new ArrayList<>(mergeDataset.get(i).get("agents"));
+                diagnosersAgentNumbers.add(agentsInMap);
+            }
+        }
+
+        for (List<Integer> l : diagnosersAgentNumbers) {
+            Collections.sort(l);
+        }
+
+        return diagnosersAgentNumbers;
+    }
+
+    private int nextIndexInNeedOfMerge(List<Map<String, List<Integer>>> mergeDataset) {
+        for (int i = 0; i < mergeDataset.size(); i++) {
+            if (mergeDataset.get(i) != null) {
+                for (Integer a : mergeDataset.get(i).get("shouldHave")) {
+                    if (!mergeDataset.get(i).get("agents").contains(a)) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 
     private List<List<Integer>> agentsNumbersAveragePathLength() {

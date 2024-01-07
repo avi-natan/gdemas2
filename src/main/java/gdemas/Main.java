@@ -60,10 +60,10 @@ public class Main {
         };
         long timeout = 10000;
 
-//        Instant start = Instant.now();
-//        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
-//        Instant end = Instant.now();
-//        long p5duration = Duration.between(start, end).toMinutes();
+        Instant start = Instant.now();
+        P05DiagnosisRunner.execute(p05executionMode, observabilities, timeout);
+        Instant end = Instant.now();
+        long p5duration = Duration.between(start, end).toMinutes();
 
         // pipeline 06 - results collection
         Instant start2 = Instant.now();
@@ -71,7 +71,7 @@ public class Main {
         Instant end2 = Instant.now();
         long p6duration = Duration.between(start2, end2).toMinutes();
 
-//        print(java.time.LocalTime.now() + ": p5 duration: " + p5duration);
+        print(java.time.LocalTime.now() + ": p5 duration: " + p5duration);
         print(java.time.LocalTime.now() + ": p6 duration: " + p6duration);
 
 
@@ -83,11 +83,11 @@ public class Main {
     private static void manualExecutionWhileWritingAlg() {
         // parameters for easier changing
         String benchmarkName = "mastrips";
-        String domainName = "rovers";
-        String problemName = "p10";
-        int faultsNum = 1;
-        int repetitionNum = 8;
-        String observability = "99p";
+        String domainName = "blocksworld";
+        String problemName = "probBLOCKS-9-0";
+        int faultsNum = 2;
+        int repetitionNum = 1;
+        String observability = "1p";
         long timeout = 10000;
 
         // input files based on the parameters
@@ -129,77 +129,77 @@ public class Main {
         record = new Record(simple);
         record.recordToTxtFile(resultsFileSimple);
 
-        simple = new ReasonerSimple(
-                benchmarkName,
-                domainName,
-                problemName,
-                domainFile,
-                problemFile,
-                agentsFile,
-                combinedPlanFile,
-                faultsFile,
-                trajectoryFile,
-                observability,
-                timeout
-        );
-        simple.diagnoseProblem();
-        outputNodesData(simple._NODES_AGENTS, simple._NODES_ACTIONS, simple._NODES_PREDICATES, graphFile);
-        record = new Record(simple);
-        record.recordToTxtFile(resultsFileSimple);
-
-        print(9);
-        Reasoner smart = new ReasonerSmart(
-                benchmarkName,
-                domainName,
-                problemName,
-                domainFile,
-                problemFile,
-                agentsFile,
-                combinedPlanFile,
-                faultsFile,
-                trajectoryFile,
-                observability,
-                timeout
-        );
-        smart.diagnoseProblem();
-        record = new Record(smart);
-        record.recordToTxtFile(resultsFileSmart);
-
-        print(9);
-        Reasoner amazing5 = new ReasonerAmazing5(
-                benchmarkName,
-                domainName,
-                problemName,
-                domainFile,
-                problemFile,
-                agentsFile,
-                combinedPlanFile,
-                faultsFile,
-                trajectoryFile,
-                observability,
-                timeout
-        );
-        amazing5.diagnoseProblem();
-        record = new Record(amazing5);
-        record.recordToTxtFile(resultsFileAmazing5);
-
-        print(9);
-        Reasoner wow = new ReasonerWow(
-                benchmarkName,
-                domainName,
-                problemName,
-                domainFile,
-                problemFile,
-                agentsFile,
-                combinedPlanFile,
-                faultsFile,
-                trajectoryFile,
-                observability,
-                timeout
-        );
-        wow.diagnoseProblem();
-        record = new Record(wow);
-        record.recordToTxtFile(resultsFileWow);
+//        simple = new ReasonerSimple(
+//                benchmarkName,
+//                domainName,
+//                problemName,
+//                domainFile,
+//                problemFile,
+//                agentsFile,
+//                combinedPlanFile,
+//                faultsFile,
+//                trajectoryFile,
+//                observability,
+//                timeout
+//        );
+//        simple.diagnoseProblem();
+//        outputNodesData(simple._NODES_AGENTS, simple._NODES_ACTIONS, simple._NODES_PREDICATES, graphFile);
+//        record = new Record(simple);
+//        record.recordToTxtFile(resultsFileSimple);
+//
+//        print(9);
+//        Reasoner smart = new ReasonerSmart(
+//                benchmarkName,
+//                domainName,
+//                problemName,
+//                domainFile,
+//                problemFile,
+//                agentsFile,
+//                combinedPlanFile,
+//                faultsFile,
+//                trajectoryFile,
+//                observability,
+//                timeout
+//        );
+//        smart.diagnoseProblem();
+//        record = new Record(smart);
+//        record.recordToTxtFile(resultsFileSmart);
+//
+//        print(9);
+//        Reasoner amazing5 = new ReasonerAmazing5(
+//                benchmarkName,
+//                domainName,
+//                problemName,
+//                domainFile,
+//                problemFile,
+//                agentsFile,
+//                combinedPlanFile,
+//                faultsFile,
+//                trajectoryFile,
+//                observability,
+//                timeout
+//        );
+//        amazing5.diagnoseProblem();
+//        record = new Record(amazing5);
+//        record.recordToTxtFile(resultsFileAmazing5);
+//
+//        print(9);
+//        Reasoner wow = new ReasonerWow(
+//                benchmarkName,
+//                domainName,
+//                problemName,
+//                domainFile,
+//                problemFile,
+//                agentsFile,
+//                combinedPlanFile,
+//                faultsFile,
+//                trajectoryFile,
+//                observability,
+//                timeout
+//        );
+//        wow.diagnoseProblem();
+//        record = new Record(wow);
+//        record.recordToTxtFile(resultsFileWow);
 
         print(9);
         Reasoner superb = new ReasonerSuperb(
